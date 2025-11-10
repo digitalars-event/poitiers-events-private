@@ -238,15 +238,40 @@
 
     <script>
       let allEvents = [];
-
+    
       async function loadEvents() {
         const r = await fetch('./events.json?v=' + Date.now(), { cache: 'no-store' });
         return r.ok ? await r.json() : { events: [] };
       }
-
-      function daysUntil(iso) {
-        if (!iso) return '';
-        const d = new Date(iso);
+    
+      // ✅ Calcule "J-X" à partir d'une date en français (ex: "Du 5 au 6 juin 2026")
+      function daysUntilText(dateText) {
+        if (!dateText) return '';
+    
+        // Trouver la dernière date mentionnée
+        const match = dateText.match(/(\d{1,2})\s*(?:[a-zéû]+\s*)?(\d{4})?/i);
+        const yearMatch = dateText.match(/(\d{4})/);
+        const year = yearMatch ? parseInt(yearMatch[1]) : new Date().getFullYear();
+    
+        // Mois FR → EN
+        const mois = {
+          janvier: 'January', février: 'February', mars: 'March', avril: 'April',
+          mai: 'May', juin: 'June', juillet: 'July', août: 'August',
+          septembre: 'September', octobre: 'October', novembre: 'November', décembre: 'December'
+        };
+        let monthName = null;
+        for (const [fr, en] of Object.entries(mois)) {
+          if (dateText.toLowerCase().includes(fr)) {
+            monthName = en;
+            break;
+          }
+        }
+    
+        if (!monthName || !match) return '';
+        const day = parseInt(match[1]);
+        const d = new Date(`${monthName} ${day}, ${year}`);
+        if (isNaN(d)) return '';
+    
         const now = new Date();
         const diff = Math.ceil((d - now) / 86400000);
         if (diff < 0) return '';
@@ -254,12 +279,12 @@
         if (diff === 1) return 'Demain';
         return 'J-' + diff;
       }
-
+    
       function cleanArenaDate(text) {
         if (!text) return '';
         return text.replace(/^.*?(dimanche|lundi|mardi|mercredi|jeudi|vendredi|samedi)/i, '$1');
       }
-
+    
       function renderAll(events) {
         const grids = {
           CGR: document.getElementById('gridCGR'),
@@ -269,21 +294,15 @@
           TAP: document.getElementById('gridTAP')
         };
         Object.values(grids).forEach(g => g.innerHTML = '');
-
-        // CGR (inchangé)
-        // ...
-        // Parc Expo (inchangé)
-        // ...
-
+    
         // 🎭 TAP CINÉMA
         events.filter(ev => ev.cinema?.includes('TAP Cinéma')).forEach(ev => {
           const poster = ev.poster || '';
-          const rel = daysUntil(ev.release);
           const genres = ev.genres || 'Genres non précisés';
           const desc = ev.description || '—';
           grids.TAP.insertAdjacentHTML('beforeend', `
             <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
+              <div class="cover" style="background-image:url('${poster}');"></div>
               <div class="content">
                 <h3>${ev.title}</h3>
                 <div class="meta">${ev.cinema} · ${genres} · ${ev.duration || 'Durée inconnue'}</div>
@@ -296,15 +315,17 @@
               </div>
             </article>`);
         });
-
-        // 🎭 TAP SPECTACLES
+    
+        // 🎭 TAP SPECTACLES — avec badge J-X
         events.filter(ev => ev.cinema === 'TAP Poitiers').forEach(ev => {
           const poster = ev.poster || '';
-          const rel = daysUntil(ev.release);
           const date = cleanArenaDate(ev.date);
+          const rel = daysUntilText(ev.date); // 🔥 ici on calcule J-X
           grids.TAP.insertAdjacentHTML('beforeend', `
             <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
+              <div class="cover" style="background-image:url('${poster}');">
+                ${rel ? `<div class="badge">${rel}</div>` : ''}
+              </div>
               <div class="content">
                 <h3>${ev.title}</h3>
                 <div class="meta">TAP Poitiers · ${date}</div>
@@ -316,11 +337,11 @@
             </article>`);
         });
       }
-
+    
       function filterEvents() {
         const query = document.getElementById('searchInput').value.toLowerCase();
         const activeFilters = Array.from(document.querySelectorAll('.filters input:checked')).map(i => i.value);
-
+    
         const filtered = allEvents.filter(ev => {
           const matchSearch =
             ev.title?.toLowerCase().includes(query) ||
@@ -329,18 +350,18 @@
           const matchFilter = activeFilters.some(f => ev.cinema?.includes(f));
           return matchSearch && matchFilter;
         });
-
+    
         renderAll(filtered);
       }
-
+    
       (async function() {
         const data = await loadEvents();
         allEvents = data.events || [];
         renderAll(allEvents);
-
+    
         document.getElementById('searchInput').addEventListener('input', filterEvents);
         document.querySelectorAll('.filters input').forEach(cb => cb.addEventListener('change', filterEvents));
-
+    
         document.addEventListener('click', e => {
           if (e.target.classList.contains('toggle-btn')) {
             const p = e.target.previousElementSibling;
