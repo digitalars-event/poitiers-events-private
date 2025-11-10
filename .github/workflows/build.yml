@@ -5,6 +5,9 @@ on:
     - cron: "0 */6 * * *" # exécution toutes les 6 heures
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
