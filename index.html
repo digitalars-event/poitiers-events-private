@@ -487,40 +487,48 @@
 
       function filterEvents() {
         const query = document.getElementById('searchInput').value.toLowerCase();
-        const checkedFilters = Array.from(document.querySelectorAll('.filters input:checked')).map(i => i.value);
-        const hasCGR = checkedFilters.includes('CGR');
+        const checkboxes = Array.from(document.querySelectorAll('.filters input[type="checkbox"]'));
+        const checkedValues = checkboxes.filter(cb => cb.checked).map(cb => cb.value);
       
-        // Les sous-cinémas actifs
-        const activeCGRSubs = checkedFilters.filter(v => v.startsWith('CGR ') && v !== 'CGR');
+        const cgrGlobal = document.querySelector('.dropdown-toggle input[value="CGR"]');
+        const cgrSubs = Array.from(document.querySelectorAll('.dropdown-content input[type="checkbox"]'));
+        const activeCGRSubs = cgrSubs.filter(cb => cb.checked).map(cb => cb.value);
+      
+        // 🎯 Synchronisation auto du CGR principal
+        if (activeCGRSubs.length === 0) {
+          cgrGlobal.checked = false;
+        } else {
+          cgrGlobal.checked = true;
+        }
       
         const filtered = allEvents.filter(ev => {
-          const titleMatch =
+          const textMatch =
             ev.title?.toLowerCase().includes(query) ||
             ev.description?.toLowerCase().includes(query) ||
             ev.cinema?.toLowerCase().includes(query);
       
-          // 🎬 Gestion spéciale du CGR
-          let matchCinema = false;
-          if (ev.cinema?.startsWith('CGR')) {
-            // Si aucun sous-cinéma n’est coché → on cache tout le CGR
-            if (!hasCGR && activeCGRSubs.length === 0) return false;
+          let match = false;
       
-            // Si CGR global est coché → on garde tout
-            if (hasCGR) matchCinema = true;
-            // Sinon on regarde les sous-cinémas
-            else matchCinema = activeCGRSubs.some(sub => ev.cinema === sub);
+          // 🎬 Gestion CGR précise
+          if (ev.cinema?.startsWith('CGR')) {
+            if (cgrGlobal.checked && activeCGRSubs.length === 0) {
+              // CGR global seul → on affiche tout
+              match = true;
+            } else {
+              // Sinon : on affiche seulement les sous-cinémas cochés
+              match = activeCGRSubs.includes(ev.cinema);
+            }
           } else {
-            // Autres cinémas : Arena, TAP, etc.
-            matchCinema = checkedFilters.some(f =>
-              ev.cinema?.toLowerCase().includes(f.toLowerCase())
-            );
+            // Autres cinémas
+            match = checkedValues.some(f => ev.cinema?.toLowerCase().includes(f.toLowerCase()));
           }
       
-          return titleMatch && matchCinema;
+          return textMatch && match;
         });
       
         renderAll(filtered);
       }
+
 
 
       (async function() {
@@ -537,8 +545,32 @@
             cb.addEventListener('change', filterEvents);
           });
         }
+
+                // Synchronisation CGR principal ↔ sous-catégories
+        function bindCGRLogic() {
+          const cgrGlobal = document.querySelector('.dropdown-toggle input[value="CGR"]');
+          const cgrSubs = document.querySelectorAll('.dropdown-content input[type="checkbox"]');
+        
+          // Si on clique sur le CGR global → active/désactive tous les sous-cinés
+          cgrGlobal.addEventListener('change', () => {
+            cgrSubs.forEach(cb => (cb.checked = cgrGlobal.checked));
+            filterEvents();
+          });
+        
+          // Si on coche/décoche un sous-ciné → met à jour l’état du global
+          cgrSubs.forEach(cb => {
+            cb.addEventListener('change', () => {
+              const allUnchecked = Array.from(cgrSubs).every(sub => !sub.checked);
+              cgrGlobal.checked = !allUnchecked;
+              filterEvents();
+            });
+          });
+        }
+        
         bindFilterListeners();
-      
+        bindCGRLogic();
+        
+              
         // Permet d'ouvrir/fermer le dropdown au clic (utile sur mobile)
         document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
           toggle.addEventListener('click', e => {
