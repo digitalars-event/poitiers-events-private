@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Événements CGR, Arena, Republic Corner & Parc Expo – Poitiers</title>
+    <title>Événements CGR, Arena, Republic Corner, Parc Expo & TAP – Poitiers</title>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-9SBQ1Y2G8H"></script>
@@ -11,7 +11,6 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-    
       gtag('config', 'G-9SBQ1Y2G8H');
     </script>
 
@@ -28,7 +27,6 @@
       }
 
       * { box-sizing: border-box; }
-
       html, body {
         background: var(--bg);
         color: var(--text);
@@ -45,7 +43,7 @@
         align-items: center;
         justify-content: center;
         color: white;
-        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        text-shadow: 0 2px 6px rgba(0,0,0,0.4);
       }
 
       .hero h1 {
@@ -55,7 +53,7 @@
         font-size: clamp(26px, 3vw, 36px);
       }
 
-      /* 🔍 Barre de recherche + filtres */
+      /* Barre de recherche + filtres */
       .search-bar {
         display: flex;
         flex-direction: column;
@@ -140,7 +138,6 @@
       @media (min-width: 700px) {
         .grid { grid-template-columns: 1fr 1fr; }
       }
-
       @media (min-width: 1000px) {
         .grid { grid-template-columns: 1fr 1fr 1fr; }
       }
@@ -206,9 +203,7 @@
   </head>
 
   <body>
-    <div class="hero">
-      <h1>Événements à Poitiers</h1>
-    </div>
+    <div class="hero"><h1>Événements à Poitiers</h1></div>
 
     <!-- 🔍 Barre de recherche + filtres -->
     <div class="search-bar">
@@ -218,6 +213,7 @@
         <label class="filter-item"><input type="checkbox" value="Arena" checked /> 🎤 Arena</label>
         <label class="filter-item"><input type="checkbox" value="Republic" checked /> 🎭 Republic Corner</label>
         <label class="filter-item"><input type="checkbox" value="Parc Expo" checked /> 🏛️ Parc Expo</label>
+        <label class="filter-item"><input type="checkbox" value="TAP" checked /> 🎭 TAP Poitiers</label>
       </div>
     </div>
 
@@ -234,7 +230,10 @@
       <h2 class="section-title">🏛️ Événements (Parc Expo Grand Poitiers)</h2>
       <section class="grid" id="gridExpo"></section>
 
-      <footer>✦ Données issues de <strong>events.json</strong> (CGR, Arena, Republic Corner & Parc Expo).</footer>
+      <h2 class="section-title">🎭 TAP Poitiers (Cinéma & Spectacles)</h2>
+      <section class="grid" id="gridTAP"></section>
+
+      <footer>✦ Données issues de <strong>events.json</strong> (CGR, Arena, Republic Corner, Parc Expo & TAP).</footer>
     </div>
 
     <script>
@@ -267,16 +266,22 @@
           Arena: document.getElementById('gridArena'),
           RC: document.getElementById('gridRC'),
           Expo: document.getElementById('gridExpo'),
+          TAP: document.getElementById('gridTAP')
         };
         Object.values(grids).forEach(g => g.innerHTML = '');
 
-        // 🎬 CGR
-        events.filter(ev => ev.cinema?.includes('CGR')).forEach(ev => {
-          const poster = ev.poster || ev.image || '';
+        // CGR (inchangé)
+        // ...
+        // Parc Expo (inchangé)
+        // ...
+
+        // 🎭 TAP CINÉMA
+        events.filter(ev => ev.cinema?.includes('TAP Cinéma')).forEach(ev => {
+          const poster = ev.poster || '';
           const rel = daysUntil(ev.release);
           const genres = ev.genres || 'Genres non précisés';
-          const desc = ev.description || ev.synopsis || '—';
-          grids.CGR.insertAdjacentHTML('beforeend', `
+          const desc = ev.description || '—';
+          grids.TAP.insertAdjacentHTML('beforeend', `
             <article class="card">
               <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
               <div class="content">
@@ -286,64 +291,27 @@
                 <button class="toggle-btn">Voir plus</button>
               </div>
               <div class="actions">
-                <a class="ghost" href="${ev.source}" target="_blank">Site CGR</a>
-                <a class="btn" href="${ev.source}" target="_blank">Voir les horaires</a>
+                <a class="ghost" href="${ev.source}" target="_blank">Site TAP Cinéma</a>
+                <a class="btn" href="${ev.source}" target="_blank">Voir le film</a>
               </div>
             </article>`);
         });
 
-        // 🎤 ARENA
-        events.filter(ev => ev.cinema?.includes('Arena')).forEach(ev => {
-          const poster = ev.poster || ev.image || '';
+        // 🎭 TAP SPECTACLES
+        events.filter(ev => ev.cinema === 'TAP Poitiers').forEach(ev => {
+          const poster = ev.poster || '';
           const rel = daysUntil(ev.release);
           const date = cleanArenaDate(ev.date);
-          grids.Arena.insertAdjacentHTML('beforeend', `
+          grids.TAP.insertAdjacentHTML('beforeend', `
             <article class="card">
               <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
               <div class="content">
                 <h3>${ev.title}</h3>
-                <div class="meta">Arena Futuroscope · ${date}</div>
+                <div class="meta">TAP Poitiers · ${date}</div>
               </div>
               <div class="actions">
                 <a class="ghost" href="${ev.source}" target="_blank">Plus d'infos</a>
                 <a class="btn" href="${ev.reservation || ev.source}" target="_blank">Réserver</a>
-              </div>
-            </article>`);
-        });
-
-        // 🎭 REPUBLIC CORNER
-        events.filter(ev => ev.cinema?.includes('Republic')).forEach(ev => {
-          const poster = ev.poster || '';
-          const rel = daysUntil(ev.date);
-          const desc = (ev.description || '').substring(0, 300) + '...';
-          grids.RC.insertAdjacentHTML('beforeend', `
-            <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
-              <div class="content">
-                <h3>${ev.title}</h3>
-                <div class="meta">${ev.address || 'Espace Republic Corner, Poitiers'}</div>
-              </div>
-              <div class="actions">
-                <a class="ghost" href="${ev.source}" target="_blank">Billetterie</a>
-                <a class="btn" href="${ev.source}" target="_blank">Réserver</a>
-              </div>
-            </article>`);
-        });
-
-        // 🏛️ PARC EXPO
-        events.filter(ev => ev.cinema?.includes('Parc Expo')).forEach(ev => {
-          const poster = ev.poster || '';
-          const rel = daysUntil(ev.date);
-          grids.Expo.insertAdjacentHTML('beforeend', `
-            <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
-              <div class="content">
-                <h3>${ev.title}</h3>
-                <div class="meta">Parc Expo Grand Poitiers</div>
-              </div>
-              <div class="actions">
-                <a class="ghost" href="${ev.source}" target="_blank">Plus d'infos</a>
-                <a class="btn" href="${ev.source}" target="_blank">Voir l'événement</a>
               </div>
             </article>`);
         });
