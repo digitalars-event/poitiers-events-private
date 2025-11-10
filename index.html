@@ -216,29 +216,39 @@
         display: none;
         position: absolute;
         top: 110%;
-        left: 0;
+        left: 50%;
+        transform: translateX(-50%);
         background: white;
         border: 1px solid var(--border);
         border-radius: 12px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         padding: 10px 14px;
-        min-width: 180px;
+        min-width: 200px;
         z-index: 999;
+        text-align: left;
       }
       
       .dropdown-content label {
         display: flex;
         align-items: center;
-        gap: 6px;
-        font-size: 14px;
-        padding: 4px 0;
+        justify-content: flex-start;
+        gap: 10px;
+        font-size: 15px;
+        padding: 6px 0;
         cursor: pointer;
+        transition: background 0.2s;
+      }
+      
+      .dropdown-content label:hover {
+        background: #f6fdf9;
+        border-radius: 6px;
       }
       
       .dropdown-content input[type="checkbox"] {
         accent-color: var(--brand);
+        transform: scale(1.1);
       }
-      
+            
       .dropdown:hover .dropdown-content,
       .dropdown.active .dropdown-content {
         display: block;
