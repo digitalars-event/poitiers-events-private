@@ -96,12 +96,25 @@ def scrape_spectacles():
             href = a["href"]
             source = href if href.startswith("http") else BASE_URL + href
 
-        # Poster
+        # Poster — ✅ gestion des <div style="background-image: url(...)">
         poster = None
+
+        # 1️⃣ D'abord essayer avec <img>
         img = show.select_one("img")
         if img and img.get("src"):
             src = img["src"]
             poster = src if src.startswith("http") else BASE_URL + src
+
+        # 2️⃣ Sinon chercher un div avec style background-image
+        if not poster:
+            bg_div = show.select_one("div[style*='background-image']")
+            if bg_div:
+                style = bg_div.get("style", "")
+                # extraire le lien contenu entre url("...") ou url('...')
+                match = re.search(r"url\((?:'|\")?(.*?)(?:'|\")?\)", style)
+                if match:
+                    src = match.group(1)
+                    poster = src if src.startswith("http") else BASE_URL + src
 
         # Date
         date_el = show.select_one(".date, time")
@@ -125,6 +138,7 @@ def scrape_spectacles():
         })
 
     return spectacles
+
 
 
 def scrape_tap():
