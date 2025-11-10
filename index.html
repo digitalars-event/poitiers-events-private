@@ -201,44 +201,56 @@
       .ghost { border: 1px solid var(--brand); background: transparent; color: var(--brand); padding: 8px 12px; border-radius: 10px; text-decoration: none; }
 
       footer { text-align: center; color: var(--muted); font-size: 12px; margin: 24px 0; }
-      /* 🌿 Menu déroulant CGR plus élégant */
+      /* 🌿 Menu déroulant CGR corrigé et cohérent */
       .dropdown {
         position: relative;
+        user-select: none;
+      }
+      
+      .dropdown-toggle {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
       }
       
       .dropdown-content {
         display: none;
         position: absolute;
-        top: 40px;
+        top: 110%;
         left: 0;
         background: white;
         border: 1px solid var(--border);
-        border-radius: 10px;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-        padding: 8px 12px;
-        min-width: 160px;
-        z-index: 10;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        padding: 10px 14px;
+        min-width: 180px;
+        z-index: 999;
       }
       
       .dropdown-content label {
-        display: block;
-        padding: 4px 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
         font-size: 14px;
-      }
-      
-      .dropdown:hover .dropdown-content {
-        display: block;
+        padding: 4px 0;
+        cursor: pointer;
       }
       
       .dropdown-content input[type="checkbox"] {
-        margin-right: 6px;
         accent-color: var(--brand);
       }
       
-      .dropdown label > input[type="checkbox"] {
-        margin-right: 6px;
-        accent-color: var(--brand);
+      .dropdown:hover .dropdown-content,
+      .dropdown.active .dropdown-content {
+        display: block;
       }
+      
+      /* Corrige le débordement du menu */
+      .filters {
+        position: relative;
+        z-index: 5;
+      }
+
     </style>
   </head>
 
@@ -250,7 +262,7 @@
       <input type="text" id="searchInput" placeholder="Rechercher un événement à Poitiers (ex : concert, film, humour...)" />
       <div class="filters">
         <div class="filter-item dropdown">
-          <label>
+          <label class="dropdown-toggle">
             <input type="checkbox" value="CGR" checked /> 🎬 CGR ▼
           </label>
           <div class="dropdown-content">
@@ -265,6 +277,7 @@
         <label class="filter-item"><input type="checkbox" value="Parc Expo" checked /> 🏛️ Parc Expo</label>
         <label class="filter-item"><input type="checkbox" value="TAP" checked /> 🎭 TAP Poitiers</label>
       </div>
+
 
 
     </div>
@@ -497,10 +510,35 @@
         const data = await loadEvents();
         allEvents = data.events || [];
         renderAll(allEvents);
-
+      
+        // Recherche texte
         document.getElementById('searchInput').addEventListener('input', filterEvents);
-        document.querySelectorAll('.filters input').forEach(cb => cb.addEventListener('change', filterEvents));
-
+      
+        // Ajout d'écouteurs sur TOUS les filtres (y compris dropdowns)
+        function bindFilterListeners() {
+          document.querySelectorAll('.filters input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', filterEvents);
+          });
+        }
+        bindFilterListeners();
+      
+        // Permet d'ouvrir/fermer le dropdown au clic (utile sur mobile)
+        document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+          toggle.addEventListener('click', e => {
+            e.preventDefault();
+            const parent = toggle.closest('.dropdown');
+            parent.classList.toggle('active');
+          });
+        });
+      
+        // Fermer le menu si on clique ailleurs
+        document.addEventListener('click', e => {
+          document.querySelectorAll('.dropdown.active').forEach(d => {
+            if (!d.contains(e.target)) d.classList.remove('active');
+          });
+        });
+      
+        // Voir plus / Voir moins
         document.addEventListener('click', e => {
           if (e.target.classList.contains('toggle-btn')) {
             const p = e.target.previousElementSibling;
