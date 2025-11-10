@@ -487,24 +487,41 @@
 
       function filterEvents() {
         const query = document.getElementById('searchInput').value.toLowerCase();
-        const activeFilters = Array.from(document.querySelectorAll('.filters input:checked')).map(i => i.value);
+        const checkedFilters = Array.from(document.querySelectorAll('.filters input:checked')).map(i => i.value);
+        const hasCGR = checkedFilters.includes('CGR');
+      
+        // Les sous-cinémas actifs
+        const activeCGRSubs = checkedFilters.filter(v => v.startsWith('CGR ') && v !== 'CGR');
       
         const filtered = allEvents.filter(ev => {
-          const matchSearch =
+          const titleMatch =
             ev.title?.toLowerCase().includes(query) ||
-            ev.cinema?.toLowerCase().includes(query) ||
-            ev.description?.toLowerCase().includes(query);
+            ev.description?.toLowerCase().includes(query) ||
+            ev.cinema?.toLowerCase().includes(query);
       
-          // ✅ Match exact sur sous-filtre (CGR Castille, Buxerolles, etc.)
-          const matchFilter = activeFilters.some(f =>
-            ev.cinema?.toLowerCase().includes(f.toLowerCase())
-          );
+          // 🎬 Gestion spéciale du CGR
+          let matchCinema = false;
+          if (ev.cinema?.startsWith('CGR')) {
+            // Si aucun sous-cinéma n’est coché → on cache tout le CGR
+            if (!hasCGR && activeCGRSubs.length === 0) return false;
       
-          return matchSearch && matchFilter;
+            // Si CGR global est coché → on garde tout
+            if (hasCGR) matchCinema = true;
+            // Sinon on regarde les sous-cinémas
+            else matchCinema = activeCGRSubs.some(sub => ev.cinema === sub);
+          } else {
+            // Autres cinémas : Arena, TAP, etc.
+            matchCinema = checkedFilters.some(f =>
+              ev.cinema?.toLowerCase().includes(f.toLowerCase())
+            );
+          }
+      
+          return titleMatch && matchCinema;
         });
       
         renderAll(filtered);
       }
+
 
       (async function() {
         const data = await loadEvents();
