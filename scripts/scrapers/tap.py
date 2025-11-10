@@ -83,46 +83,36 @@ def scrape_spectacles():
     soup = BeautifulSoup(r.text, "html.parser")
     spectacles = []
 
-    for show in soup.select("article"):
-        title_el = show.select_one("h2, h3, .title")
-        if not title_el:
-            continue
-        title = title_el.get_text(strip=True)
-
-        # Source
-        a = show.select_one("a")
-        source = None
-        if a and a.get("href"):
-            href = a["href"]
-            source = href if href.startswith("http") else BASE_URL + href
-
-        # Poster — ✅ gestion des <div style="background-image: url(...)">
+    # Chaque spectacle est dans un conteneur .col-item
+    for block in soup.select(".col-item"):
+        # 🎭 Image (dans div.grid-block__picture)
         poster = None
+        bg_div = block.select_one(".grid-block__picture[style*='background-image']")
+        if bg_div:
+            style = bg_div.get("style", "")
+            match = re.search(r'url\((?:&quot;|["\']?)(.*?)(?:&quot;|["\']?)\)', style)
+            if match:
+                src = match.group(1)
+                poster = src if src.startswith("http") else BASE_URL + src
 
-        # 1️⃣ D'abord essayer avec <img>
-        img = show.select_one("img")
-        if img and img.get("src"):
-            src = img["src"]
-            poster = src if src.startswith("http") else BASE_URL + src
+        # 🎟️ Article lié
+        article = block.select_one("article")
+        if not article:
+            continue
 
-        # 2️⃣ Sinon chercher un div avec style background-image
-        if not poster:
-            bg_div = show.select_one("div[style*='background-image']")
-            if bg_div:
-                style = bg_div.get("style", "")
-                # extraire le lien contenu entre url("...") ou url('...')
-                match = re.search(r"url\((?:'|\")?(.*?)(?:'|\")?\)", style)
-                if match:
-                    src = match.group(1)
-                    poster = src if src.startswith("http") else BASE_URL + src
+        # Titre + lien source
+        title_el = article.select_one("h2 a, h3 a, .grid-block__title a")
+        title = title_el.get_text(strip=True) if title_el else "Sans titre"
+        href = title_el["href"] if title_el and title_el.get("href") else None
+        source = href if href and href.startswith("http") else BASE_URL + href if href else None
 
-        # Date
-        date_el = show.select_one(".date, time")
+        # 🗓️ Date
+        date_el = article.select_one("time, .grid-block__date")
         date_text = date_el.get_text(" ", strip=True) if date_el else "Date à venir"
 
-        # Reservation
+        # 🔗 Réservation
         reservation = None
-        res_a = show.select_one("a[href*='billet'], a[href*='ticket'], a[href*='resa']")
+        res_a = article.select_one("a[href*='billet'], a[href*='ticket'], a[href*='resa']")
         if res_a and res_a.get("href"):
             reservation = res_a["href"]
 
@@ -138,8 +128,6 @@ def scrape_spectacles():
         })
 
     return spectacles
-
-
 
 def scrape_tap():
     """Combine cinéma + spectacle dans une seule structure"""
