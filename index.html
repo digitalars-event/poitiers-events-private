@@ -132,11 +132,12 @@
       /* 🎞️ Carrousels horizontaux type Netflix */
       .grid {
         display: flex;
-        overflow-x: auto;
-        scroll-behavior: smooth;
+        transition: transform 0.5s ease;
         gap: 16px;
-        padding: 10px 0;
+        width: max-content; /* s’adapte à la longueur totale des cartes */
       }
+
+
       
       .grid::-webkit-scrollbar {
         height: 8px;
@@ -146,10 +147,12 @@
         border-radius: 4px;
       }
       
+      /* 🎞️ Carrousel type Netflix — 3 cartes visibles */
       .carousel-container {
         position: relative;
+        overflow: hidden; /* Masque les cartes hors de la zone visible */
       }
-      
+            
       .carousel-btn {
         position: absolute;
         top: 50%;
@@ -194,6 +197,19 @@
         flex-direction: column;
         box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         transition: transform 0.2s, box-shadow 0.2s;
+        flex: 0 0 calc(33.333% - 10.66px); /* ✅ 3 cartes visibles à la fois */
+      }
+      
+      @media (max-width: 900px) {
+        .card {
+          flex: 0 0 calc(50% - 8px); /* 2 cartes visibles sur tablette */
+        }
+      }
+      
+      @media (max-width: 600px) {
+        .card {
+          flex: 0 0 100%; /* 1 carte visible sur mobile */
+        }
       }
 
       .card:hover {
@@ -702,23 +718,34 @@
           });
         }
 
-        // 🎞️ Navigation horizontale dans les carrousels
+        // 🎞️ Navigation horizontale améliorée (3 cartes visibles)
         function setupCarousels() {
           document.querySelectorAll('.carousel-btn').forEach(btn => {
             btn.addEventListener('click', () => {
               const targetId = btn.dataset.target;
               const grid = document.getElementById(targetId);
               if (!grid) return;
-              const scrollAmount = grid.clientWidth * 0.9; // 90% du conteneur visible
+        
+              const cardWidth = grid.querySelector('.card')?.offsetWidth || 300;
+              const gap = 16;
+              const scrollAmount = (cardWidth + gap) * 3; // défile 3 cartes à la fois
+        
+              const currentTransform = parseFloat(grid.dataset.offset || 0);
+              let newTransform = currentTransform;
+        
               if (btn.classList.contains('left')) {
-                grid.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                newTransform = Math.min(currentTransform + scrollAmount, 0);
               } else {
-                grid.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                const maxScroll = -(grid.scrollWidth - grid.parentElement.clientWidth);
+                newTransform = Math.max(currentTransform - scrollAmount, maxScroll);
               }
+        
+              grid.style.transform = `translateX(${newTransform}px)`;
+              grid.dataset.offset = newTransform;
             });
           });
-        }
-        
+        } 
+                
         setupCarousels();
                 
                 // Fermer le menu si clic ailleurs
