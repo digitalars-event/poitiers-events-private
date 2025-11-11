@@ -55,6 +55,30 @@
         border-bottom: 1px solid var(--border);
       }
 
+      /* ---- Voir plus / Voir moins ---- */
+      .toggle-btn{
+        background:none;
+        border:0;
+        padding:0;
+        margin-top:6px;
+        color:var(--brand);
+        font-weight:700;
+        font-size:14px;
+        cursor:pointer;
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+      }
+      .toggle-btn::after{
+        content:"▼";
+        font-size:12px;
+        transition:transform .2s ease;
+      }
+      .toggle-btn.active::after{
+        transform:rotate(180deg);
+      }
+      
+
       .search-bar input {
         width: 100%;
         max-width: 550px;
@@ -179,7 +203,17 @@
 
       .content h3 { margin: 0; font-size: 16.5px; }
       .meta { font-size: 13px; color: var(--muted); }
-      .synopsis { font-size: 13px; line-height: 1.5; color: var(--text); max-height: 3.5em; overflow: hidden; }
+      .synopsis{
+        font-size:13px;
+        line-height:1.5;
+        color:var(--text);
+        max-height:3.5em;   /* texte réduit par défaut */
+        overflow:hidden;
+        transition:max-height .3s ease;
+      }
+      .synopsis.expanded{
+        max-height:300px;   /* ouvert */
+      }
 
       .actions {
         margin-top: auto;
@@ -488,6 +522,7 @@
               </div>
             </article>`);
         });
+        bindToggleButtons();
       }
 
       /* === CARROUSEL FLUIDE === */
@@ -537,6 +572,26 @@
           renderAll(filtered);
           setupCarousels();
         });
+
+        function bindToggleButtons(){
+          // Délie et relie proprement à chaque rendu
+          document.querySelectorAll('.toggle-btn').forEach(btn => {
+            // Evite les doublons d'écouteurs
+            btn.replaceWith(btn.cloneNode(true));
+          });
+        
+          document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const content = btn.closest('.content');
+              const p = content ? content.querySelector('.synopsis') : null;
+              if(!p) return;
+              const expanded = p.classList.toggle('expanded');
+              btn.classList.toggle('active', expanded);
+              btn.textContent = expanded ? 'Voir moins' : 'Voir plus';
+            });
+          });
+        }
+        
 
         // Filtres par lieu
         document.querySelectorAll('.filters input[type="checkbox"]').forEach(cb => {
