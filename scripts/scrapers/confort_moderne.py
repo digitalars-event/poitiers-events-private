@@ -2,17 +2,18 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import json
+import re
 
 def scrape_confort_moderne():
     url = "https://www.confort-moderne.fr/fr/agenda/details"
     events = []
 
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=15)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
 
-        rows = soup.select("table tbody tr")
+        rows = soup.select("tr.tr-table")
         current_month = None
 
         for row in rows:
@@ -20,55 +21,68 @@ def scrape_confort_moderne():
             if not cols:
                 continue
 
-            # Colonne Mois (souvent sur la gauche)
-            if "NOVE" in cols[0].get_text(strip=True).upper() or len(cols) == 5:
-                month_text = cols[0].get_text(strip=True)
-                if month_text:
-                    current_month = month_text
-                    continue
+            # --- Mois (souvent 1ère colonne)
+            month_td = cols[0]
+            if month_td and month_td.get_text(strip=True):
+                current_month = month_td.get_text(strip=True)
 
-            # Si l’élément a au moins 5 colonnes valides
-            if len(cols) >= 5:
-                date = cols[0].get_text(strip=True)
-                img_tag = cols[1].find("img")
-                poster = img_tag["src"] if img_tag and "src" in img_tag.attrs else None
+            # --- Date / période
+            date_td = cols[1] if len(cols) > 1 else None
+            date_text = date_td.get_text(" ", strip=True) if date_td else ""
 
-                title_block = cols[2].get_text(" ", strip=True)
-                title = title_block.split("\n")[0].strip()
-                description = title_block.replace(title, "").strip()
+            # --- Image (fond de div.img_filter)
+            img_td = row.select_one("td.img-table .img_filter")
+            poster = None
+            if img_td and "background-image" in img_td.get("style", ""):
+                match = re.search(r"url\(['\"]?(.*?)['\"]?\)", img_td["style"])
+                if match:
+                    poster = match.group(1)
 
-                type_event = cols[3].get_text(strip=True)
-                location = cols[4].get_text(strip=True)
+            # --- Titre et description (artistes)
+            title_td = row.select_one("td a.clic")
+            title = title_td.get_text(strip=True) if title_td else "Sans titre"
+            description_span = row.select_one("td span span")
+            description = description_span.get_text(strip=True) if description_span else None
 
-                # Compose un champ date lisible
-                if current_month:
-                    full_date = f"{date} {current_month}".strip()
-                else:
-                    full_date = date.strip()
+            # --- Type (Concert, Expo...)
+            type_td = row.select_one("td.expo, td span")
+            type_event = type_td.get_text(strip=True) if type_td else None
 
-                events.append({
-                    "title": title,
-                    "date": full_date,
-                    "poster": poster,
-                    "description": description or None,
-                    "cinema": "Confort Moderne",
-                    "type": type_event,
-                    "location": location,
-                    "source": url,
-                    "scraped_at": datetime.now().isoformat()
-                })
+            # --- Lien source (onclick ou <a>)
+            onclick = row.get("onclick")
+            if onclick and "location.href=" in onclick:
+                match = re.search(r"location\.href='(.*?)'", onclick)
+                source = match.group(1) if match else url
+            else:
+                link_tag = row.select_one("a.clic")
+                source = link_tag["href"] if link_tag and "href" in link_tag.attrs else url
 
-        # Supprime doublons et nettoie
+            # --- Concatène mois + date si possible
+            full_date = f"{current_month} {date_text}".strip()
+
+            events.append({
+                "title": title,
+                "date": full_date,
+                "poster": poster,
+                "description": description,
+                "cinema": "Confort Moderne",
+                "type": type_event,
+                "location": "Confort Moderne, Poitiers",
+                "source": source,
+                "scraped_at": datetime.now().isoformat()
+            })
+
+        # Nettoyage doublons
+        unique = []
         seen = set()
-        unique_events = []
         for ev in events:
-            key = ev["title"] + ev.get("date", "")
+            key = (ev["title"].lower(), ev["date"].lower())
             if key not in seen:
                 seen.add(key)
-                unique_events.append(ev)
+                unique.append(ev)
 
-        print(f"🎸 Confort Moderne : {len(unique_events)} événements collectés")
-        return unique_events
+        print(f"🎸 Confort Moderne : {len(unique)} événements collectés")
+        return unique
 
     except Exception as e:
         print(f"❌ Erreur lors du scraping Confort Moderne : {e}")
