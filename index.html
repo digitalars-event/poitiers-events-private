@@ -682,8 +682,27 @@
             dropdown.classList.toggle('active');
           });
         }
+
+        // 🎞️ Navigation horizontale dans les carrousels
+        function setupCarousels() {
+          document.querySelectorAll('.carousel-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const targetId = btn.dataset.target;
+              const grid = document.getElementById(targetId);
+              if (!grid) return;
+              const scrollAmount = grid.clientWidth * 0.9; // 90% du conteneur visible
+              if (btn.classList.contains('left')) {
+                grid.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+              } else {
+                grid.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+              }
+            });
+          });
+        }
         
-        // Fermer le menu si clic ailleurs
+        setupCarousels();
+                
+                // Fermer le menu si clic ailleurs
         document.addEventListener('click', e => {
           document.querySelectorAll('.dropdown.active').forEach(d => {
             if (!d.contains(e.target)) d.classList.remove('active');
