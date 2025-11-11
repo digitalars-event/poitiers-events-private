@@ -23,7 +23,7 @@ def normalize_date(day_text: str, month_text: str):
         "septembre": 9, "octobre": 10, "novembre": 11, "décembre": 12
     }
 
-    # Ignore “jusqu’au” ou “à partir du”
+    # Ignore les cas particuliers
     if "jusqu" in day_text.lower() or "partir" in day_text.lower():
         return None
 
@@ -39,7 +39,6 @@ def normalize_date(day_text: str, month_text: str):
 
     now = datetime.now()
     year = now.year
-    # Exemple : janvier en novembre → année suivante
     if month < now.month - 3:
         year += 1
 
@@ -70,27 +69,32 @@ def scrape_confort_moderne():
         current_month = None
 
         for row in rows:
-            cols = row.find_all("td")
-            if not cols or len(cols) < 3:
-                continue  # ligne vide ou non pertinente
+            tds = row.find_all("td")
+            if not tds:
+                continue
 
-            # --- Mois (première colonne)
-            month_td = cols[0] if len(cols) > 0 else None
-            month_text = clean_text(month_td.get_text()) if month_td else ""
-            if month_text:
-                current_month = month_text
+            # --- Si le premier td contient un nom de mois (ex: NOVEMBRE)
+            possible_month = clean_text(tds[0].get_text())
+            if re.match(r"^(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)$", possible_month.lower()):
+                current_month = possible_month
+                # ensuite, les colonnes sont décalées : date en 2e, image en 3e, etc.
+                td_offset = 1
+            else:
+                # pas de mois sur cette ligne (héritage du précédent)
+                td_offset = 0
 
-            # --- Date
-            date_td = cols[1] if len(cols) > 1 else None
-            date_text = clean_text(date_td.get_text()) if date_td else ""
-            if not date_text and not current_month:
-                continue  # ligne vide inutile
+            # --- Vérifie qu’on a au moins la colonne "date"
+            if len(tds) <= td_offset:
+                continue
 
-            # --- Image (fond d’une div)
+            # --- Jour
+            date_text = clean_text(tds[td_offset].get_text())
+
+            # --- Image
             img_td = row.select_one("td.img-table .img_filter")
             poster = None
             if img_td and "background-image" in img_td.get("style", ""):
-                match = re.search(r"url\\(['\"]?(.*?)['\"]?\\)", img_td["style"])
+                match = re.search(r"url\(['\"]?(.*?)['\"]?\)", img_td["style"])
                 if match:
                     poster = match.group(1)
 
@@ -103,18 +107,18 @@ def scrape_confort_moderne():
             description = clean_text(description_span.get_text()) if description_span else None
 
             # --- Type (Concert, Expo, etc.)
-            type_td = cols[-2] if len(cols) >= 5 else None
+            type_td = tds[-2] if len(tds) >= 5 else None
             type_event = clean_text(type_td.get_text()) if type_td else None
 
             # --- Lieu
-            location_td = cols[-1] if len(cols) >= 6 else None
+            location_td = tds[-1] if len(tds) >= 6 else None
             location = clean_text(location_td.get_text()) or "Confort Moderne, Poitiers"
 
-            # --- Source (onclick ou lien)
+            # --- Lien source
             source = url
             onclick = row.get("onclick")
             if onclick and "location.href" in onclick:
-                match = re.search(r"location\\.href='(.*?)'", onclick)
+                match = re.search(r"location\.href='(.*?)'", onclick)
                 if match:
                     source = match.group(1)
             elif title_tag and title_tag.get("href"):
