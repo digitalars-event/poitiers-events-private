@@ -603,15 +603,16 @@
           const toggle = dropdown.querySelector('.dropdown-toggle');
           const checkbox = toggle.querySelector('input[type="checkbox"]');
         
-          // Empêche le clic sur la case de fermer le menu
+          // ✅ Clic sur la case CGR → coche/décoche et filtre normalement
           checkbox.addEventListener('click', e => {
-            e.stopPropagation(); // ⛔ bloque la propagation du clic vers le parent
+            e.stopPropagation(); // Empêche juste l’ouverture du menu
+            // Laisse le navigateur changer la case, puis filtre
+            setTimeout(() => filterEvents(), 50);
           });
         
-          // Clic sur la zone "CGR ▼" (hors case) → ouvre/ferme le menu
+          // ✅ Clic sur le bloc (hors case) → ouvre/ferme le menu
           toggle.addEventListener('click', e => {
-            // Ne pas déclencher si clic directement sur la case
-            if (e.target === checkbox) return;
+            if (e.target === checkbox) return; // Ignorer si clic sur la case
             e.preventDefault();
             dropdown.classList.toggle('active');
           });
