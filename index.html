@@ -3,18 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Événements CGR, Arena, Republic Corner, Parc Expo & TAP – Poitiers</title>
+    <title>Événements CGR, Arena, Republic Corner, Parc Expo, TAP & Confort Moderne – Poitiers</title>
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9SBQ1Y2G8H"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-9SBQ1Y2G8H');
-    </script>
-
-    <style>f
+    <style>
       :root {
         --bg: #f7f7f7;
         --panel: #ffffff;
@@ -26,20 +17,19 @@
         --card: #fff;
       }
 
-      * { box-sizing: border-box; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
 
       html, body {
         background: var(--bg);
         color: var(--text);
         font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial;
-        margin: 0;
       }
 
       .hero {
         background-image: url('https://www.hifrance.org/wp-content/uploads/2025/10/Poitiers-Site-HI-Banniere.jpg');
         background-size: cover;
         background-position: center;
-        height: 200px;
+        height: 220px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -48,10 +38,10 @@
       }
 
       .hero h1 {
-        background: rgba(0,0,0,0.3);
-        padding: 12px 24px;
+        background: rgba(0,0,0,0.35);
+        padding: 14px 28px;
         border-radius: 12px;
-        font-size: clamp(26px, 3vw, 36px);
+        font-size: clamp(26px, 3vw, 38px);
       }
 
       /* Barre de recherche + filtres */
@@ -59,7 +49,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        background: #f7f7f7;
+        background: var(--bg);
         padding: 16px;
         position: sticky;
         top: 0;
@@ -69,7 +59,7 @@
 
       .search-bar input {
         width: 100%;
-        max-width: 500px;
+        max-width: 550px;
         padding: 10px 14px;
         border: 1px solid var(--border);
         border-radius: 12px;
@@ -114,23 +104,28 @@
       }
 
       .wrap {
-        max-width: 1100px;
+        max-width: 1200px;
         margin: 0 auto;
         padding: 0 16px;
       }
 
       .section-title {
-        margin-left: 40px;
-        margin-top: 30px;
+        margin-top: 36px;
         margin-bottom: 12px;
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 700;
         color: var(--brand);
         border-left: 5px solid var(--brand);
         padding-left: 8px;
       }
 
-      /* 🎞️ Carrousels horizontaux type Netflix */
+      /* --- CARROUSELS --- */
+      .carousel-container {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+      }
+
       .grid {
         display: flex;
         gap: 16px;
@@ -138,86 +133,31 @@
         will-change: transform;
       }
 
-
-      
-      .grid::-webkit-scrollbar {
-        height: 8px;
-      }
-      .grid::-webkit-scrollbar-thumb {
-        background: var(--brand);
-        border-radius: 4px;
-      }
-      
-      /* 🎞️ Carrousel type Netflix — 3 cartes visibles */
-      .carousel-container {
-        position: relative;
-        overflow: hidden;
-        width: 100%;
-        max-width: 1100px;
-        margin: 0 auto;
-      }
-            
-      /* Flèches */
-      .carousel-btn {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(255,255,255,0.95);
-        border: 1px solid var(--border);
-        border-radius: 50%;
-        width: 38px;
-        height: 38px;
-        font-size: 22px;
-        color: var(--brand);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-        transition: all 0.3s ease;
-      }
-      
-      .carousel-btn:hover {
-        background: var(--brand);
-        color: white;
-      }
-      
-      .carousel-btn.left { left: -20px; }
-      .carousel-btn.right { right: -20px; }
-
-      @media (min-width: 700px) {
-        .grid { grid-template-columns: 1fr 1fr; }
-      }
-
-      @media (min-width: 1000px) {
-        .grid { grid-template-columns: 1fr 1fr 1fr; }
-      }
-
       .card {
         background: var(--card);
         border: 1px solid var(--border);
         border-radius: 16px;
         overflow: hidden;
-        display: flex;
-        flex-direction: column;
+        flex: 0 0 25%; /* 4 cartes visibles sur desktop */
         box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         transition: transform 0.2s, box-shadow 0.2s;
-        flex: 0 0 calc((100% - 32px) / 3); /* 3 cartes avec espace entre */
-        box-sizing: border-box;
-      }
-      
-      /* 🪄 Responsive */
-      @media (max-width: 900px) {
-        .card { flex: 0 0 calc((100% - 16px) / 2); } /* 2 visibles */
-      }
-      
-      @media (max-width: 600px) {
-        .card { flex: 0 0 100%; } /* 1 visible sur mobile */
       }
 
       .card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        transform: translateY(-4px);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      }
+
+      @media (max-width: 1024px) {
+        .card { flex: 0 0 33.333%; } /* 3 cartes */
+      }
+
+      @media (max-width: 800px) {
+        .card { flex: 0 0 50%; } /* 2 cartes */
+      }
+
+      @media (max-width: 550px) {
+        .card { flex: 0 0 100%; } /* 1 carte */
       }
 
       .cover {
@@ -249,93 +189,66 @@
 
       .content h3 { margin: 0; font-size: 16.5px; }
       .meta { font-size: 13px; color: var(--muted); }
-      .synopsis { font-size: 13px; line-height: 1.5; color: var(--text); max-height: 3.5em; overflow: hidden; position: relative; transition: max-height 0.4s ease; }
-      .synopsis.expanded { max-height: 300px; }
+      .synopsis { font-size: 13px; line-height: 1.5; color: var(--text); max-height: 3.5em; overflow: hidden; }
 
-      .toggle-btn { background: none; border: none; color: var(--brand); font-weight: 600; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; padding: 0; }
-      .toggle-btn::after { content: "▼"; font-size: 11px; transition: transform 0.3s ease; }
-      .toggle-btn.active::after { transform: rotate(180deg); }
-
-      .actions { margin-top: auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 0 14px 14px 14px; }
-      .btn { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: white; border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer; text-decoration: none; font-weight: 600; }
-      .ghost { border: 1px solid var(--brand); background: transparent; color: var(--brand); padding: 8px 12px; border-radius: 10px; text-decoration: none; }
-
-      footer { text-align: center; color: var(--muted); font-size: 12px; margin: 24px 0; }
-      /* 🌿 Menu déroulant CGR corrigé et cohérent */
-      .dropdown {
-        position: relative;
-        user-select: none;
-      }
-      
-      .dropdown-toggle {
+      .actions {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
         align-items: center;
+        gap: 12px;
+        padding: 0 14px 14px 14px;
+      }
+
+      .btn {
+        background: linear-gradient(135deg, var(--brand), var(--brand-2));
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 10px;
         cursor: pointer;
+        text-decoration: none;
+        font-weight: 600;
       }
-      
-      .dropdown-content {
-        display: none;
+
+      .ghost {
+        border: 1px solid var(--brand);
+        background: transparent;
+        color: var(--brand);
+        padding: 8px 12px;
+        border-radius: 10px;
+        text-decoration: none;
+      }
+
+      .carousel-btn {
         position: absolute;
-        top: 110%;
-        left: 50%;
-        transform: translateX(-50%);
-        background: white;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.95);
         border: 1px solid var(--border);
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        padding: 10px 14px;
-        min-width: 200px;
-        z-index: 999;
-        text-align: left;
-      }
-      
-      .dropdown-content label {
+        border-radius: 50%;
+        width: 38px;
+        height: 38px;
+        font-size: 22px;
+        color: var(--brand);
+        cursor: pointer;
         display: flex;
         align-items: center;
-        justify-content: flex-start;
-        gap: 10px;
-        font-size: 15px;
-        padding: 6px 10px;
-        cursor: pointer;
-        transition: background 0.2s;
-        width: 100%;
-        box-sizing: border-box;
-      }
-      
-      .dropdown-content label:hover {
-        background: #f6fdf9;
-        border-radius: 6px;
-      }
-      
-      .dropdown-content input[type="checkbox"] {
-          accent-color: var(--brand);
-          transform: scale(1.1);
-          flex-shrink: 0;
-          width: 20px; /* largeur fixe pour un alignement parfait */
-        }
-
-
-      .dropdown-content label span {
-        flex: 1;
-        text-align: left;
-      }
-      
-      .dropdown-content label:hover {
-          background: #f6fdf9;
-          border-radius: 6px;
-        }
-
-            
-      .dropdown:hover .dropdown-content,
-      .dropdown.active .dropdown-content {
-        display: block;
-      }
-      
-      /* Corrige le débordement du menu */
-      .filters {
-        position: relative;
-        z-index: 5;
+        justify-content: center;
+        z-index: 10;
+        transition: all 0.3s ease;
       }
 
+      .carousel-btn:hover { background: var(--brand); color: white; }
+      .carousel-btn.left { left: -18px; }
+      .carousel-btn.right { right: -18px; }
+
+      footer {
+        text-align: center;
+        color: var(--muted);
+        font-size: 12px;
+        margin: 40px 0;
+      }
     </style>
   </head>
 
@@ -346,70 +259,59 @@
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Rechercher un événement à Poitiers (ex : concert, film, humour...)" />
       <div class="filters">
-        <div class="filter-item dropdown">
-          <label class="dropdown-toggle">
-            <input type="checkbox" value="CGR" checked /> 🎬 CGR ▼
-          </label>
-          <div class="dropdown-content">
-            <label><input type="checkbox" value="CGR Castille" checked /> Castille</label>
-            <label><input type="checkbox" value="CGR Buxerolles" checked /> Buxerolles</label>
-            <label><input type="checkbox" value="CGR Fontaine-le-Comte" checked /> Fontaine-le-Comte</label>
-          </div>
-        </div>
-      
-        <label class="filter-item"><input type="checkbox" value="Arena" checked />   Arena</label>
-        <label class="filter-item"><input type="checkbox" value="Republic" checked />   Republic Corner</label>
-        <label class="filter-item"><input type="checkbox" value="Parc Expo" checked />   Parc Expo</label>
-        <label class="filter-item"><input type="checkbox" value="TAP" checked />   TAP Poitiers</label>
-        <label class="filter-item"><input type="checkbox" value="Confort Moderne" checked />   Confort Moderne</label>
+        <label class="filter-item"><input type="checkbox" value="CGR" checked /> 🎬 CGR</label>
+        <label class="filter-item"><input type="checkbox" value="Arena" checked /> 🎤 Arena</label>
+        <label class="filter-item"><input type="checkbox" value="Republic" checked /> 🎭 Republic Corner</label>
+        <label class="filter-item"><input type="checkbox" value="Parc Expo" checked /> 🏛️ Parc Expo</label>
+        <label class="filter-item"><input type="checkbox" value="TAP" checked /> 🎭 TAP Poitiers</label>
+        <label class="filter-item"><input type="checkbox" value="Confort Moderne" checked /> 🎸 Confort Moderne</label>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <h2 class="section-title">🎬 Films à l'affiche (CGR)</h2>
+      <div class="carousel-container">
+        <button class="carousel-btn left" data-target="gridCGR">‹</button>
+        <section class="grid" id="gridCGR"></section>
+        <button class="carousel-btn right" data-target="gridCGR">›</button>
       </div>
 
-
-
-    </div>
-      <h2 class="section-title">🎬 Films à l'affiche (CGR)</h2>
-        <div class="carousel-container">
-          <button class="carousel-btn left" data-target="gridCGR">‹</button>
-          <section class="grid" id="gridCGR"></section>
-          <button class="carousel-btn right" data-target="gridCGR">›</button>
-        </div>
-
       <h2 class="section-title">🎤 Concerts & Spectacles (Arena)</h2>
-        <div class="carousel-container">
-          <button class="carousel-btn left" data-target="gridArena">‹</button>
-          <section class="grid" id="gridArena"></section>
-          <button class="carousel-btn right" data-target="gridArena">›</button>
-        </div>
+      <div class="carousel-container">
+        <button class="carousel-btn left" data-target="gridArena">‹</button>
+        <section class="grid" id="gridArena"></section>
+        <button class="carousel-btn right" data-target="gridArena">›</button>
+      </div>
 
       <h2 class="section-title">🎭 Soirées & Humour (Republic Corner)</h2>
-        <div class="carousel-container">
-          <button class="carousel-btn left" data-target="gridRC">‹</button>
-          <section class="grid" id="gridRC"></section>
-          <button class="carousel-btn right" data-target="gridRC">›</button>
-        </div>
+      <div class="carousel-container">
+        <button class="carousel-btn left" data-target="gridRC">‹</button>
+        <section class="grid" id="gridRC"></section>
+        <button class="carousel-btn right" data-target="gridRC">›</button>
+      </div>
 
       <h2 class="section-title">🏛️ Événements (Parc Expo Grand Poitiers)</h2>
-        <div class="carousel-container">
-          <button class="carousel-btn left" data-target="gridExpo">‹</button>
-          <section class="grid" id="gridExpo"></section>
-          <button class="carousel-btn right" data-target="gridExpo">›</button>
-        </div>
+      <div class="carousel-container">
+        <button class="carousel-btn left" data-target="gridExpo">‹</button>
+        <section class="grid" id="gridExpo"></section>
+        <button class="carousel-btn right" data-target="gridExpo">›</button>
+      </div>
 
       <h2 class="section-title">🎭 TAP Poitiers (Cinéma & Spectacles)</h2>
-        <div class="carousel-container">
-          <button class="carousel-btn left" data-target="gridTAP">‹</button>
-          <section class="grid" id="gridTAP"></section>
-          <button class="carousel-btn right" data-target="gridTAP">›</button>
-        </div>
+      <div class="carousel-container">
+        <button class="carousel-btn left" data-target="gridTAP">‹</button>
+        <section class="grid" id="gridTAP"></section>
+        <button class="carousel-btn right" data-target="gridTAP">›</button>
+      </div>
 
       <h2 class="section-title">🎸 Confort Moderne</h2>
-        <div class="carousel-container">
-          <button class="carousel-btn left" data-target="gridCM">‹</button>
-          <section class="grid" id="gridCM"></section>
-          <button class="carousel-btn right" data-target="gridCM">›</button>
-        </div>
+      <div class="carousel-container">
+        <button class="carousel-btn left" data-target="gridCM">‹</button>
+        <section class="grid" id="gridCM"></section>
+        <button class="carousel-btn right" data-target="gridCM">›</button>
+      </div>
 
-      <footer>✦ Données issues de <strong>events.json</strong> (CGR, Arena, Republic Corner, Parc Expo & TAP).</footer>
+      <footer>✦ Données issues de <strong>events.json</strong> (CGR, Arena, Republic Corner, Parc Expo, TAP & Confort Moderne).</footer>
     </div>
 
     <script>
@@ -420,52 +322,6 @@
         return r.ok ? await r.json() : { events: [] };
       }
 
-      function daysUntil(iso) {
-        if (!iso) return '';
-        const d = new Date(iso);
-        const now = new Date();
-        const diff = Math.ceil((d - now) / 86400000);
-        if (diff < 0) return '';
-        if (diff === 0) return 'Aujourd’hui';
-        if (diff === 1) return 'Demain';
-        return 'J-' + diff;
-      }
-
-      function daysUntilText(dateText) {
-        if (!dateText) return '';
-        const match = dateText.match(/(\d{1,2})\s*(?:[a-zéû]+\s*)?(\d{4})?/i);
-        const yearMatch = dateText.match(/(\d{4})/);
-        const year = yearMatch ? parseInt(yearMatch[1]) : new Date().getFullYear();
-
-        const mois = {
-          janvier: 'January', février: 'February', mars: 'March', avril: 'April',
-          mai: 'May', juin: 'June', juillet: 'July', août: 'August',
-          septembre: 'September', octobre: 'October', novembre: 'November', décembre: 'December'
-        };
-        let monthName = null;
-        for (const [fr, en] of Object.entries(mois)) {
-          if (dateText.toLowerCase().includes(fr)) {
-            monthName = en;
-            break;
-          }
-        }
-        if (!monthName || !match) return '';
-        const day = parseInt(match[1]);
-        const d = new Date(`${monthName} ${day}, ${year}`);
-        if (isNaN(d)) return '';
-        const now = new Date();
-        const diff = Math.ceil((d - now) / 86400000);
-        if (diff < 0) return '';
-        if (diff === 0) return 'Aujourd’hui';
-        if (diff === 1) return 'Demain';
-        return 'J-' + diff;
-      }
-
-      function cleanArenaDate(text) {
-        if (!text) return '';
-        return text.replace(/^.*?(dimanche|lundi|mardi|mercredi|jeudi|vendredi|samedi)/i, '$1');
-      }
-
       function renderAll(events) {
         const grids = {
           CGR: document.getElementById('gridCGR'),
@@ -473,295 +329,75 @@
           RC: document.getElementById('gridRC'),
           Expo: document.getElementById('gridExpo'),
           TAP: document.getElementById('gridTAP'),
-          CM: document.getElementById('gridCM')   // 👈 AJOUT
+          CM: document.getElementById('gridCM')
         };
         Object.values(grids).forEach(g => g.innerHTML = '');
 
-        // 🎬 CGR
-        events.filter(ev => ev.cinema?.includes('CGR')).forEach(ev => {
-          const poster = ev.poster || ev.image || '';
-          const rel = daysUntil(ev.release);
-          const genres = ev.genres || 'Genres non précisés';
-          const desc = ev.description || ev.synopsis || '—';
-          grids.CGR.insertAdjacentHTML('beforeend', `
-            <article class="card">
-              <div class="cover" style="background-image:url('${poster}');"><div class="badge">Actuellement à l'affiche</div></div>
-              <div class="content">
-                <h3>${ev.title}</h3>
-                <div class="meta">${ev.cinema} · ${genres} · ${ev.duration || 'Durée inconnue'}</div>
-                <p class="synopsis">${desc}</p>
-                <button class="toggle-btn">Voir plus</button>
-              </div>
-              <div class="actions">
-                <a class="ghost" href="${ev.source}" target="_blank">Site CGR</a>
-                <a class="btn" href="${ev.source}" target="_blank">Voir les horaires</a>
-              </div>
-            </article>`);
-        });
-
-        // 🎤 ARENA
-        events.filter(ev => ev.cinema?.includes('Arena')).forEach(ev => {
-          const poster = ev.poster || ev.image || '';
-          const rel = daysUntil(ev.release);
-          const date = cleanArenaDate(ev.date);
-          grids.Arena.insertAdjacentHTML('beforeend', `
-            <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
-              <div class="content">
-                <h3>${ev.title}</h3>
-                <div class="meta">Arena Futuroscope · ${date}</div>
-              </div>
-              <div class="actions">
-                <a class="ghost" href="${ev.source}" target="_blank">Plus d'infos</a>
-                <a class="btn" href="${ev.reservation || ev.source}" target="_blank">Réserver</a>
-              </div>
-            </article>`);
-        });
-
-        // 🎭 REPUBLIC CORNER
-        events.filter(ev => ev.cinema?.includes('Republic')).forEach(ev => {
+        events.forEach(ev => {
           const poster = ev.poster || '';
-          const rel = daysUntil(ev.date);
-          grids.RC.insertAdjacentHTML('beforeend', `
+          const rel = ev.release ? new Date(ev.release).toLocaleDateString() : '';
+          const cardHTML = `
             <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
-              <div class="content">
-                <h3>${ev.title}</h3>
-                <div class="meta">${ev.address || 'Espace Republic Corner, Poitiers'}</div>
-              </div>
-              <div class="actions">
-                <a class="ghost" href="${ev.source}" target="_blank">Billetterie</a>
-                <a class="btn" href="${ev.source}" target="_blank">Réserver</a>
-              </div>
-            </article>`);
-        });
-
-        // 🏛️ PARC EXPO
-        events.filter(ev => ev.cinema?.includes('Parc Expo')).forEach(ev => {
-          const poster = ev.poster || '';
-          const rel = daysUntil(ev.date);
-          grids.Expo.insertAdjacentHTML('beforeend', `
-            <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
-              <div class="content">
-                <h3>${ev.title}</h3>
-                <div class="meta">Parc Expo Grand Poitiers</div>
-              </div>
-              <div class="actions">
-                <a class="ghost" href="${ev.source}" target="_blank">Plus d'infos</a>
-                <a class="btn" href="${ev.source}" target="_blank">Voir l'événement</a>
-              </div>
-            </article>`);
-        });
-
-        // 🎭 TAP CINÉMA
-        events.filter(ev => ev.cinema?.includes('TAP Cinéma')).forEach(ev => {
-          const poster = ev.poster || '';
-          const genres = ev.genres || 'Genres non précisés';
-          const desc = ev.description || '—';
-          grids.TAP.insertAdjacentHTML('beforeend', `
-            <article class="card">
-              <div class="cover" style="background-image:url('${poster}');"></div>
-              <div class="content">
-                <h3>${ev.title}</h3>
-                <div class="meta">${ev.cinema} · ${genres} · ${ev.duration || 'Durée inconnue'}</div>
-                <p class="synopsis">${desc}</p>
-                <button class="toggle-btn">Voir plus</button>
-              </div>
-              <div class="actions">
-                <a class="ghost" href="${ev.source}" target="_blank">Site TAP Cinéma</a>
-                <a class="btn" href="${ev.source}" target="_blank">Voir le film</a>
-              </div>
-            </article>`);
-        });
-
-        // 🎭 TAP SPECTACLES (avec badge J-X)
-        events.filter(ev => ev.cinema === 'TAP Poitiers').forEach(ev => {
-          const poster = ev.poster || '';
-          const date = cleanArenaDate(ev.date);
-          const rel = daysUntilText(ev.date);
-          grids.TAP.insertAdjacentHTML('beforeend', `
-            <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">
+              <div class="cover" style="background-image:url('${poster}')">
                 ${rel ? `<div class="badge">${rel}</div>` : ''}
               </div>
               <div class="content">
-                <h3>${ev.title}</h3>
-                <div class="meta">TAP Poitiers · ${date}</div>
+                <h3>${ev.title || 'Sans titre'}</h3>
+                <div class="meta">${ev.cinema || ''} · ${ev.date || ''}</div>
               </div>
               <div class="actions">
                 <a class="ghost" href="${ev.source}" target="_blank">Plus d'infos</a>
-                <a class="btn" href="${ev.reservation || ev.source}" target="_blank">Réserver</a>
+                <a class="btn" href="${ev.source}" target="_blank">Voir</a>
               </div>
-            </article>`);
-        });
-
-        // 🎸 CONFORT MODERNE (même visuel que TAP spectacles)
-        events.filter(ev => ev.cinema === 'Confort Moderne').forEach(ev => {
-          const poster = ev.poster || '';
-          const date = cleanArenaDate(ev.date);
-          const rel = daysUntilText(ev.date);  // badge J-X calculé depuis la date texte
-          grids.CM.insertAdjacentHTML('beforeend', `
-            <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">
-                ${rel ? `<div class="badge">${rel}</div>` : ''}
-              </div>
-              <div class="content">
-                <h3>${ev.title}</h3>
-                <div class="meta">Confort Moderne · ${date}</div>
-              </div>
-              <div class="actions">
-                <a class="ghost" href="${ev.source}" target="_blank">Plus d'infos</a>
-                <a class="btn" href="${ev.reservation || ev.source}" target="_blank">Réserver</a>
-              </div>
-            </article>`);
-        });
-      }
-
-      function filterEvents() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        const checkboxes = Array.from(document.querySelectorAll('.filters input[type="checkbox"]'));
-        const checkedValues = checkboxes.filter(cb => cb.checked).map(cb => cb.value);
-      
-        const cgrGlobal = document.querySelector('.dropdown-toggle input[value="CGR"]');
-        const cgrSubs = Array.from(document.querySelectorAll('.dropdown-content input[type="checkbox"]'));
-        const activeCGRSubs = cgrSubs.filter(cb => cb.checked).map(cb => cb.value);
-      
-        const filtered = allEvents.filter(ev => {
-          const textMatch =
-            ev.title?.toLowerCase().includes(query) ||
-            ev.description?.toLowerCase().includes(query) ||
-            ev.cinema?.toLowerCase().includes(query);
-      
-          let match = false;
-      
-          // 🎬 Gestion CGR
-          if (ev.cinema?.startsWith('CGR')) {
-            // Si le global est décoché → tout masquer
-            if (!cgrGlobal.checked) return false;
-      
-            // Si global coché + aucun sous-ciné coché → tout afficher
-            if (activeCGRSubs.length === 0) return true;
-      
-            // Sinon : afficher seulement les sous-cinés cochés
-            match = activeCGRSubs.includes(ev.cinema);
-          } else {
-            // Autres cinés
-            match = checkedValues.some(f =>
-              ev.cinema?.toLowerCase().includes(f.toLowerCase())
-            );
+            </article>`;
+          if (grids[ev.cinema?.includes('CGR') ? 'CGR' :
+              ev.cinema?.includes('Arena') ? 'Arena' :
+              ev.cinema?.includes('Republic') ? 'RC' :
+              ev.cinema?.includes('Parc Expo') ? 'Expo' :
+              ev.cinema?.includes('TAP') ? 'TAP' :
+              ev.cinema?.includes('Confort Moderne') ? 'CM' : null]) {
+            grids[ev.cinema.includes('CGR') ? 'CGR' :
+              ev.cinema.includes('Arena') ? 'Arena' :
+              ev.cinema.includes('Republic') ? 'RC' :
+              ev.cinema.includes('Parc Expo') ? 'Expo' :
+              ev.cinema.includes('TAP') ? 'TAP' :
+              'CM'].insertAdjacentHTML('beforeend', cardHTML);
           }
-      
-          return textMatch && match;
         });
-      
-        renderAll(filtered);
       }
 
+      function setupCarousels() {
+        document.querySelectorAll('.carousel-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const targetId = btn.dataset.target;
+            const grid = document.getElementById(targetId);
+            if (!grid) return;
 
+            const container = grid.closest('.carousel-container');
+            const visibleWidth = container.offsetWidth;
+            const scrollAmount = visibleWidth * 0.9;
+
+            const current = parseFloat(grid.dataset.offset || 0);
+            let next = current;
+
+            if (btn.classList.contains('left')) {
+              next = Math.min(current + scrollAmount, 0);
+            } else {
+              const maxScroll = -(grid.scrollWidth - visibleWidth);
+              next = Math.max(current - scrollAmount, maxScroll);
+            }
+
+            grid.style.transform = `translateX(${next}px)`;
+            grid.dataset.offset = next;
+          });
+        });
+      }
 
       (async function() {
         const data = await loadEvents();
         allEvents = data.events || [];
         renderAll(allEvents);
-      
-        // Recherche texte
-        document.getElementById('searchInput').addEventListener('input', filterEvents);
-      
-        // Ajout d'écouteurs sur TOUS les filtres (y compris dropdowns)
-        function bindFilterListeners() {
-          document.querySelectorAll('.filters input[type="checkbox"]').forEach(cb => {
-            cb.addEventListener('change', filterEvents);
-          });
-        }
-
-        // Synchronisation CGR principal ↔ sous-catégories
-        function bindCGRLogic() {
-          const cgrGlobal = document.querySelector('.dropdown-toggle input[value="CGR"]');
-          const cgrSubs = Array.from(document.querySelectorAll('.dropdown-content input[type="checkbox"]'));
-        
-          // ✅ Clic sur le CGR global → coche/décoche tous les sous-cinés
-          cgrGlobal.addEventListener('change', () => {
-            cgrSubs.forEach(cb => (cb.checked = cgrGlobal.checked));
-            filterEvents();
-          });
-        
-          // ✅ Clic sur un sous-ciné → met à jour l’état du global
-          cgrSubs.forEach(cb => {
-            cb.addEventListener('change', () => {
-              const anyChecked = cgrSubs.some(sub => sub.checked);
-              cgrGlobal.checked = anyChecked; // Si aucun sous-ciné → global décoché
-              filterEvents();
-            });
-          });
-        }
-                
-        bindFilterListeners();
-        bindCGRLogic();
-        setupDropdownToggle();
-        
-              
-        // Gérer ouverture/fermeture du menu sans interférer avec la case
-        function setupDropdownToggle() {
-          const dropdown = document.querySelector('.dropdown');
-          const toggle = dropdown.querySelector('.dropdown-toggle');
-          const checkbox = toggle.querySelector('input[type="checkbox"]');
-        
-          // Clic sur la case → juste filtrer (sans ouvrir le menu)
-          checkbox.addEventListener('click', e => {
-            e.stopPropagation();
-            setTimeout(() => filterEvents(), 50);
-          });
-        
-          // Clic sur le bloc "CGR ▼" (hors case) → ouvrir / fermer
-          toggle.addEventListener('click', e => {
-            if (e.target === checkbox) return;
-            e.preventDefault();
-            dropdown.classList.toggle('active');
-          });
-        }
-
-        // 🎞️ Navigation horizontale améliorée (3 cartes visibles)
-        function setupCarousels() {
-          document.querySelectorAll('.carousel-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-              const targetId = btn.dataset.target;
-              const grid = document.getElementById(targetId);
-              if (!grid) return;
-        
-              const container = grid.closest('.carousel-container');
-              const visibleWidth = container.offsetWidth;
-              const gap = 16;
-        
-              // Nombre de cartes visibles (calcul dynamique)
-              const cardWidth = grid.querySelector('.card')?.offsetWidth || 300;
-              const scrollAmount = visibleWidth - gap;
-        
-              // Calcul du décalage actuel
-              const current = parseFloat(grid.dataset.offset || 0);
-              let next = current;
-        
-              if (btn.classList.contains('left')) {
-                next = Math.min(current + scrollAmount, 0);
-              } else {
-                const maxScroll = -(grid.scrollWidth - visibleWidth);
-                next = Math.max(current - scrollAmount, maxScroll);
-              }
-        
-              grid.style.transform = `translateX(${next}px)`;
-              grid.dataset.offset = next;
-            });
-          });
-        }
-                      
         setupCarousels();
-                
-                // Fermer le menu si clic ailleurs
-        document.addEventListener('click', e => {
-          document.querySelectorAll('.dropdown.active').forEach(d => {
-            if (!d.contains(e.target)) d.classList.remove('active');
-          });
-        });
       })();
     </script>
   </body>
