@@ -5,15 +5,20 @@ import json
 import re
 import locale
 
-# --- Locale française
+# --- Locale française pour les noms de mois
 try:
     locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
 except:
     pass
 
 
+def clean_text(text):
+    """Nettoie les espaces et caractères parasites."""
+    return re.sub(r"\s+", " ", text or "").strip()
+
+
 def normalize_date(day_text: str, month_text: str):
-    """Convertit un jour et un mois français en ISO si possible."""
+    """Convertit une combinaison jour/mois français en ISO 8601."""
     if not day_text or not month_text:
         return None
 
@@ -23,23 +28,23 @@ def normalize_date(day_text: str, month_text: str):
         "septembre": 9, "octobre": 10, "novembre": 11, "décembre": 12
     }
 
-    # Ignore les cas particuliers
+    # Cas spéciaux
     if "jusqu" in day_text.lower() or "partir" in day_text.lower():
         return None
 
-    # Extraire le jour
+    # Trouver un chiffre dans le texte
     m = re.search(r"(\d{1,2})", day_text)
     if not m:
         return None
 
     day = int(m.group(1))
-    month = months.get(month_text.lower())
+    month = months.get(month_text.strip().lower())
     if not month:
         return None
 
     now = datetime.now()
     year = now.year
-    if month < now.month - 3:
+    if month < now.month - 3:  # janvier après novembre → année suivante
         year += 1
 
     try:
@@ -49,91 +54,72 @@ def normalize_date(day_text: str, month_text: str):
         return None
 
 
-def clean_text(text):
-    """Nettoie les espaces et caractères parasites."""
-    if not text:
-        return ""
-    return re.sub(r"\s+", " ", text).strip()
-
-
 def scrape_confort_moderne():
     url = "https://www.confort-moderne.fr/fr/agenda/details"
     events = []
 
     try:
-        response = requests.get(url, timeout=15)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, "html.parser")
+        res = requests.get(url, timeout=15)
+        res.raise_for_status()
+        soup = BeautifulSoup(res.text, "html.parser")
 
-        rows = soup.select("tr.tr-table")
         current_month = None
+        rows = soup.select("tr.tr-table")
 
         for row in rows:
-            tds = row.find_all("td")
-            if not tds:
+            cols = row.find_all("td")
+            if not cols:
                 continue
 
-            # --- Si le premier td contient un nom de mois (ex: NOVEMBRE)
-            possible_month = clean_text(tds[0].get_text())
-            if re.match(r"^(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)$", possible_month.lower()):
-                current_month = possible_month
-                # ensuite, les colonnes sont décalées : date en 2e, image en 3e, etc.
-                td_offset = 1
+            # Détection du mois
+            month_text = clean_text(cols[0].get_text()) if cols else ""
+            if re.search(r"(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)", month_text.lower()):
+                current_month = month_text
+                offset = 1
             else:
-                # pas de mois sur cette ligne (héritage du précédent)
-                td_offset = 0
+                offset = 0
 
-            # --- Vérifie qu’on a au moins la colonne "date"
-            if len(tds) <= td_offset:
-                continue
-
-            # --- Jour
-            date_text = clean_text(tds[td_offset].get_text())
+            # --- Date (jour)
+            try:
+                date_text = clean_text(cols[offset].get_text())
+            except IndexError:
+                date_text = ""
 
             # --- Image
-            img_td = row.select_one("td.img-table .img_filter")
+            img_tag = row.select_one(".img_filter")
             poster = None
-            if img_td and "background-image" in img_td.get("style", ""):
-                match = re.search(r"url\(['\"]?(.*?)['\"]?\)", img_td["style"])
+            if img_tag and "background-image" in img_tag.get("style", ""):
+                match = re.search(r"url\(['\"]?(.*?)['\"]?\)", img_tag["style"])
                 if match:
                     poster = match.group(1)
 
-            # --- Titre principal
-            title_tag = row.select_one("td a.clic")
+            # --- Titre et artistes
+            title_tag = row.select_one("a.clic")
             title = clean_text(title_tag.get_text()) if title_tag else "Sans titre"
 
-            # --- Description (artistes)
-            description_span = row.select_one("td span span")
-            description = clean_text(description_span.get_text()) if description_span else None
+            artist_tag = row.select_one("td span span")
+            description = clean_text(artist_tag.get_text()) if artist_tag else None
 
             # --- Type (Concert, Expo, etc.)
-            type_td = tds[-2] if len(tds) >= 5 else None
+            type_td = cols[-2] if len(cols) >= 5 else None
             type_event = clean_text(type_td.get_text()) if type_td else None
 
             # --- Lieu
-            location_td = tds[-1] if len(tds) >= 6 else None
+            location_td = cols[-1] if len(cols) >= 6 else None
             location = clean_text(location_td.get_text()) or "Confort Moderne, Poitiers"
 
-            # --- Lien source
-            source = url
-            onclick = row.get("onclick")
-            if onclick and "location.href" in onclick:
-                match = re.search(r"location\.href='(.*?)'", onclick)
-                if match:
-                    source = match.group(1)
-            elif title_tag and title_tag.get("href"):
-                source = title_tag["href"]
+            # --- Lien
+            onclick = row.get("onclick", "")
+            match = re.search(r"location.href='(.*?)'", onclick)
+            source = match.group(1) if match else url
 
-            # --- Fusion mois + jour
+            # --- Fusion des dates
             full_date = f"{current_month or ''} {date_text}".strip()
             iso_date = normalize_date(date_text, current_month or "")
 
-            # --- Format lisible
-            pretty_date = f"{date_text.capitalize()} {current_month.capitalize()}" if current_month else date_text
-
             events.append({
                 "title": title,
-                "date": pretty_date,
+                "date": full_date,
                 "release": iso_date,
                 "poster": poster,
                 "description": description,
@@ -144,8 +130,9 @@ def scrape_confort_moderne():
                 "scraped_at": datetime.now().isoformat()
             })
 
-        # --- Suppression doublons
-        unique, seen = [], set()
+        # Nettoyage doublons
+        seen = set()
+        unique = []
         for ev in events:
             key = (ev["title"].lower(), ev["date"].lower())
             if key not in seen:
