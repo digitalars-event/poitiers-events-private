@@ -132,9 +132,9 @@
       /* 🎞️ Carrousels horizontaux type Netflix */
       .grid {
         display: flex;
-        transition: transform 0.5s ease;
         gap: 16px;
-        width: max-content; /* s’adapte à la longueur totale des cartes */
+        transition: transform 0.6s ease-in-out;
+        will-change: transform;
       }
 
 
@@ -150,26 +150,30 @@
       /* 🎞️ Carrousel type Netflix — 3 cartes visibles */
       .carousel-container {
         position: relative;
-        overflow: hidden; /* Masque les cartes hors de la zone visible */
+        overflow: hidden;
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
       }
             
+      /* Flèches */
       .carousel-btn {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        background: rgba(255,255,255,0.9);
+        background: rgba(255,255,255,0.95);
         border: 1px solid var(--border);
         border-radius: 50%;
-        width: 36px;
-        height: 36px;
-        font-size: 20px;
+        width: 38px;
+        height: 38px;
+        font-size: 22px;
         color: var(--brand);
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 10;
-        transition: all 0.3s;
+        transition: all 0.3s ease;
       }
       
       .carousel-btn:hover {
@@ -177,8 +181,8 @@
         color: white;
       }
       
-      .carousel-btn.left { left: -18px; }
-      .carousel-btn.right { right: -18px; }
+      .carousel-btn.left { left: -20px; }
+      .carousel-btn.right { right: -20px; }
 
       @media (min-width: 700px) {
         .grid { grid-template-columns: 1fr 1fr; }
@@ -197,19 +201,17 @@
         flex-direction: column;
         box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         transition: transform 0.2s, box-shadow 0.2s;
-        flex: 0 0 calc(33.333% - 10.66px); /* ✅ 3 cartes visibles à la fois */
+        flex: 0 0 calc((100% - 32px) / 3); /* 3 cartes avec espace entre */
+        box-sizing: border-box;
       }
       
+      /* 🪄 Responsive */
       @media (max-width: 900px) {
-        .card {
-          flex: 0 0 calc(50% - 8px); /* 2 cartes visibles sur tablette */
-        }
+        .card { flex: 0 0 calc((100% - 16px) / 2); } /* 2 visibles */
       }
       
       @media (max-width: 600px) {
-        .card {
-          flex: 0 0 100%; /* 1 carte visible sur mobile */
-        }
+        .card { flex: 0 0 100%; } /* 1 visible sur mobile */
       }
 
       .card:hover {
@@ -726,26 +728,31 @@
               const grid = document.getElementById(targetId);
               if (!grid) return;
         
-              const cardWidth = grid.querySelector('.card')?.offsetWidth || 300;
+              const container = grid.closest('.carousel-container');
+              const visibleWidth = container.offsetWidth;
               const gap = 16;
-              const scrollAmount = (cardWidth + gap) * 3; // défile 3 cartes à la fois
         
-              const currentTransform = parseFloat(grid.dataset.offset || 0);
-              let newTransform = currentTransform;
+              // Nombre de cartes visibles (calcul dynamique)
+              const cardWidth = grid.querySelector('.card')?.offsetWidth || 300;
+              const scrollAmount = visibleWidth - gap;
+        
+              // Calcul du décalage actuel
+              const current = parseFloat(grid.dataset.offset || 0);
+              let next = current;
         
               if (btn.classList.contains('left')) {
-                newTransform = Math.min(currentTransform + scrollAmount, 0);
+                next = Math.min(current + scrollAmount, 0);
               } else {
-                const maxScroll = -(grid.scrollWidth - grid.parentElement.clientWidth);
-                newTransform = Math.max(currentTransform - scrollAmount, maxScroll);
+                const maxScroll = -(grid.scrollWidth - visibleWidth);
+                next = Math.max(current - scrollAmount, maxScroll);
               }
         
-              grid.style.transform = `translateX(${newTransform}px)`;
-              grid.dataset.offset = newTransform;
+              grid.style.transform = `translateX(${next}px)`;
+              grid.dataset.offset = next;
             });
           });
-        } 
-                
+        }
+                      
         setupCarousels();
                 
                 // Fermer le menu si clic ailleurs
