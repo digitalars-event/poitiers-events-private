@@ -129,12 +129,53 @@
         padding-left: 8px;
       }
 
+      /* 🎞️ Carrousels horizontaux type Netflix */
       .grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 14px;
-        margin-top: 16px;
+        display: flex;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        gap: 16px;
+        padding: 10px 0;
       }
+      
+      .grid::-webkit-scrollbar {
+        height: 8px;
+      }
+      .grid::-webkit-scrollbar-thumb {
+        background: var(--brand);
+        border-radius: 4px;
+      }
+      
+      .carousel-container {
+        position: relative;
+      }
+      
+      .carousel-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.9);
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+        color: var(--brand);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        transition: all 0.3s;
+      }
+      
+      .carousel-btn:hover {
+        background: var(--brand);
+        color: white;
+      }
+      
+      .carousel-btn.left { left: -18px; }
+      .carousel-btn.right { right: -18px; }
 
       @media (min-width: 700px) {
         .grid { grid-template-columns: 1fr 1fr; }
@@ -308,9 +349,12 @@
 
     </div>
 
-    <div class="wrap" id="mainContent">
-      <h2 class="section-title">🎬 Films à l'affiche (CGR)</h2>
-      <section class="grid" id="gridCGR"></section>
+    <h2 class="section-title">🎬 Films à l'affiche (CGR)</h2>
+      <div class="carousel-container">
+        <button class="carousel-btn left" data-target="gridCGR">‹</button>
+        <section class="grid" id="gridCGR"></section>
+        <button class="carousel-btn right" data-target="gridCGR">›</button>
+      </div>
 
       <h2 class="section-title">🎤 Concerts & Spectacles (Arena)</h2>
       <section class="grid" id="gridArena"></section>
