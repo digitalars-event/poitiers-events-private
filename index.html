@@ -3,14 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Événements à Poitiers – CGR, Arena, TAP, Confort Moderne, etc.</title>
+    <title>Événements à Poitiers – CGR, Arena, TAP, Confort Moderne & plus</title>
 
     <style>
       :root {
         --bg: #f7f7f7;
-        --panel: #ffffff;
-        --muted: #555;
         --text: #111;
+        --muted: #555;
         --brand: #097d4c;
         --brand-2: #13b46d;
         --border: #ddd;
@@ -19,7 +18,7 @@
 
       * { box-sizing: border-box; margin: 0; padding: 0; }
 
-      html, body {
+      body {
         background: var(--bg);
         color: var(--text);
         font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial;
@@ -44,7 +43,6 @@
         font-size: clamp(26px, 3vw, 38px);
       }
 
-      /* Barre de recherche + filtres */
       .search-bar {
         display: flex;
         flex-direction: column;
@@ -64,14 +62,7 @@
         border: 1px solid var(--border);
         border-radius: 12px;
         font-size: 15px;
-        outline: none;
-        transition: box-shadow 0.2s;
         margin-bottom: 10px;
-      }
-
-      .search-bar input:focus {
-        box-shadow: 0 0 0 2px var(--brand-2);
-        border-color: var(--brand);
       }
 
       .filters {
@@ -82,6 +73,7 @@
       }
 
       .filter-item {
+        display: flex;
         align-items: center;
         gap: 6px;
         background: white;
@@ -90,7 +82,6 @@
         padding: 6px 10px;
         font-size: 14px;
         cursor: pointer;
-        transition: all 0.2s;
       }
 
       .filter-item:hover {
@@ -100,7 +91,6 @@
 
       .filter-item input[type="checkbox"] {
         accent-color: var(--brand);
-        cursor: pointer;
       }
 
       .wrap {
@@ -119,7 +109,7 @@
         padding-left: 8px;
       }
 
-      /* --- CARROUSELS --- */
+      /* === CARROUSELS === */
       .carousel-container {
         position: relative;
         overflow: hidden;
@@ -255,7 +245,6 @@
   <body>
     <div class="hero"><h1>Événements à Poitiers</h1></div>
 
-    <!-- 🔍 Barre de recherche + filtres -->
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Rechercher un événement à Poitiers (ex : concert, film, humour...)" />
       <div class="filters">
@@ -336,8 +325,6 @@
 
       function daysUntilText(dateText) {
         if (!dateText) return '';
-        const match = dateText.match(/(\d{1,2})/);
-        if (!match) return '';
         const now = new Date();
         const target = new Date(dateText);
         const diff = Math.ceil((target - now) / 86400000);
@@ -349,7 +336,7 @@
         return text.replace(/^.*?(dimanche|lundi|mardi|mercredi|jeudi|vendredi|samedi)/i, '$1');
       }
 
-      /* === RENDER ALL (préservé intégralement) === */
+      /* === RENDER ALL (intégralement conservée) === */
       function renderAll(events) {
         const grids = {
           CGR: document.getElementById('gridCGR'),
@@ -357,42 +344,211 @@
           RC: document.getElementById('gridRC'),
           Expo: document.getElementById('gridExpo'),
           TAP: document.getElementById('gridTAP'),
-          CM: document.getElementById('gridCM')
+          CM: document.getElementById('gridCM')   // 👈 AJOUT
         };
         Object.values(grids).forEach(g => g.innerHTML = '');
 
-        // (ta fonction complète inchangée)
-        // ... [garde ici ton bloc tel quel, il est copié intégralement de ta version]
+        // 🎬 CGR
+        events.filter(ev => ev.cinema?.includes('CGR')).forEach(ev => {
+          const poster = ev.poster || ev.image || '';
+          const rel = daysUntil(ev.release);
+          const genres = ev.genres || 'Genres non précisés';
+          const desc = ev.description || ev.synopsis || '—';
+          grids.CGR.insertAdjacentHTML('beforeend', `
+            <article class="card">
+              <div class="cover" style="background-image:url('${poster}');"><div class="badge">Actuellement à l'affiche</div></div>
+              <div class="content">
+                <h3>${ev.title}</h3>
+                <div class="meta">${ev.cinema} · ${genres} · ${ev.duration || 'Durée inconnue'}</div>
+                <p class="synopsis">${desc}</p>
+                <button class="toggle-btn">Voir plus</button>
+              </div>
+              <div class="actions">
+                <a class="ghost" href="${ev.source}" target="_blank">Site CGR</a>
+                <a class="btn" href="${ev.source}" target="_blank">Voir les horaires</a>
+              </div>
+            </article>`);
+        });
+
+        // 🎤 ARENA
+        events.filter(ev => ev.cinema?.includes('Arena')).forEach(ev => {
+          const poster = ev.poster || ev.image || '';
+          const rel = daysUntil(ev.release);
+          const date = cleanArenaDate(ev.date);
+          grids.Arena.insertAdjacentHTML('beforeend', `
+            <article class="card">
+              <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
+              <div class="content">
+                <h3>${ev.title}</h3>
+                <div class="meta">Arena Futuroscope · ${date}</div>
+              </div>
+              <div class="actions">
+                <a class="ghost" href="${ev.source}" target="_blank">Plus d'infos</a>
+                <a class="btn" href="${ev.reservation || ev.source}" target="_blank">Réserver</a>
+              </div>
+            </article>`);
+        });
+
+        // 🎭 REPUBLIC CORNER
+        events.filter(ev => ev.cinema?.includes('Republic')).forEach(ev => {
+          const poster = ev.poster || '';
+          const rel = daysUntil(ev.date);
+          grids.RC.insertAdjacentHTML('beforeend', `
+            <article class="card">
+              <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
+              <div class="content">
+                <h3>${ev.title}</h3>
+                <div class="meta">${ev.address || 'Espace Republic Corner, Poitiers'}</div>
+              </div>
+              <div class="actions">
+                <a class="ghost" href="${ev.source}" target="_blank">Billetterie</a>
+                <a class="btn" href="${ev.source}" target="_blank">Réserver</a>
+              </div>
+            </article>`);
+        });
+
+        // 🏛️ PARC EXPO
+        events.filter(ev => ev.cinema?.includes('Parc Expo')).forEach(ev => {
+          const poster = ev.poster || '';
+          const rel = daysUntil(ev.date);
+          grids.Expo.insertAdjacentHTML('beforeend', `
+            <article class="card">
+              <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
+              <div class="content">
+                <h3>${ev.title}</h3>
+                <div class="meta">Parc Expo Grand Poitiers</div>
+              </div>
+              <div class="actions">
+                <a class="ghost" href="${ev.source}" target="_blank">Plus d'infos</a>
+                <a class="btn" href="${ev.source}" target="_blank">Voir l'événement</a>
+              </div>
+            </article>`);
+        });
+
+        // 🎭 TAP CINÉMA
+        events.filter(ev => ev.cinema?.includes('TAP Cinéma')).forEach(ev => {
+          const poster = ev.poster || '';
+          const genres = ev.genres || 'Genres non précisés';
+          const desc = ev.description || '—';
+          grids.TAP.insertAdjacentHTML('beforeend', `
+            <article class="card">
+              <div class="cover" style="background-image:url('${poster}');"></div>
+              <div class="content">
+                <h3>${ev.title}</h3>
+                <div class="meta">${ev.cinema} · ${genres} · ${ev.duration || 'Durée inconnue'}</div>
+                <p class="synopsis">${desc}</p>
+                <button class="toggle-btn">Voir plus</button>
+              </div>
+              <div class="actions">
+                <a class="ghost" href="${ev.source}" target="_blank">Site TAP Cinéma</a
+                <a class="ghost" href="${ev.source}" target="_blank">Site TAP Cinéma</a>
+                <a class="btn" href="${ev.source}" target="_blank">Voir le film</a>
+              </div>
+            </article>`);
+        });
+
+        // 🎭 TAP SPECTACLES (avec badge J-X)
+        events.filter(ev => ev.cinema === 'TAP Poitiers').forEach(ev => {
+          const poster = ev.poster || '';
+          const date = cleanArenaDate(ev.date);
+          const rel = daysUntilText(ev.date);
+          grids.TAP.insertAdjacentHTML('beforeend', `
+            <article class="card">
+              <div class="cover" style="background-image:url('${poster}');">
+                ${rel ? `<div class="badge">${rel}</div>` : ''}
+              </div>
+              <div class="content">
+                <h3>${ev.title}</h3>
+                <div class="meta">TAP Poitiers · ${date}</div>
+              </div>
+              <div class="actions">
+                <a class="ghost" href="${ev.source}" target="_blank">Plus d'infos</a>
+                <a class="btn" href="${ev.reservation || ev.source}" target="_blank">Réserver</a>
+              </div>
+            </article>`);
+        });
+
+        // 🎸 CONFORT MODERNE (même visuel que TAP spectacles)
+        events.filter(ev => ev.cinema === 'Confort Moderne').forEach(ev => {
+          const poster = ev.poster || '';
+          const date = cleanArenaDate(ev.date);
+          const rel = daysUntilText(ev.date);
+          grids.CM.insertAdjacentHTML('beforeend', `
+            <article class="card">
+              <div class="cover" style="background-image:url('${poster}');">
+                ${rel ? `<div class="badge">${rel}</div>` : ''}
+              </div>
+              <div class="content">
+                <h3>${ev.title}</h3>
+                <div class="meta">Confort Moderne · ${date}</div>
+              </div>
+              <div class="actions">
+                <a class="ghost" href="${ev.source}" target="_blank">Plus d'infos</a>
+                <a class="btn" href="${ev.reservation || ev.source}" target="_blank">Réserver</a>
+              </div>
+            </article>`);
+        });
       }
 
+      /* === CARROUSEL FLUIDE === */
       function setupCarousels() {
         document.querySelectorAll('.carousel-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const targetId = btn.dataset.target;
             const grid = document.getElementById(targetId);
             if (!grid) return;
+
             const container = grid.closest('.carousel-container');
             const visibleWidth = container.offsetWidth;
             const scrollAmount = visibleWidth * 0.9;
+
             const current = parseFloat(grid.dataset.offset || 0);
             let next = current;
+
             if (btn.classList.contains('left')) {
               next = Math.min(current + scrollAmount, 0);
             } else {
               const maxScroll = -(grid.scrollWidth - visibleWidth);
               next = Math.max(current - scrollAmount, maxScroll);
             }
+
             grid.style.transform = `translateX(${next}px)`;
             grid.dataset.offset = next;
           });
         });
       }
 
+      /* === INITIALISATION === */
       (async function() {
         const data = await loadEvents();
         allEvents = data.events || [];
+
         renderAll(allEvents);
         setupCarousels();
+
+        // Recherche texte en direct
+        document.getElementById('searchInput').addEventListener('input', e => {
+          const query = e.target.value.toLowerCase();
+          const filtered = allEvents.filter(ev =>
+            ev.title?.toLowerCase().includes(query) ||
+            ev.description?.toLowerCase().includes(query) ||
+            ev.cinema?.toLowerCase().includes(query)
+          );
+          renderAll(filtered);
+          setupCarousels();
+        });
+
+        // Filtres par lieu
+        document.querySelectorAll('.filters input[type="checkbox"]').forEach(cb => {
+          cb.addEventListener('change', () => {
+            const active = Array.from(document.querySelectorAll('.filters input[type="checkbox"]:checked')).map(el => el.value);
+            const filtered = allEvents.filter(ev =>
+              active.some(a => ev.cinema?.toLowerCase().includes(a.toLowerCase()))
+            );
+            renderAll(filtered);
+            setupCarousels();
+          });
+        });
       })();
     </script>
   </body>
