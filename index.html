@@ -594,32 +594,34 @@
         
         bindFilterListeners();
         bindCGRLogic();
+        setupDropdownToggle();
         
               
-        // Permet d'ouvrir/fermer le dropdown au clic (utile sur mobile)
-        document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
-          toggle.addEventListener('click', e => {
-            e.preventDefault();
-            const parent = toggle.closest('.dropdown');
-            parent.classList.toggle('active');
+        // Gérer ouverture/fermeture du menu sans interférer avec la case
+        function setupDropdownToggle() {
+          const dropdown = document.querySelector('.dropdown');
+          const toggle = dropdown.querySelector('.dropdown-toggle');
+          const checkbox = toggle.querySelector('input[type="checkbox"]');
+        
+          // Empêche le clic sur la case de fermer le menu
+          checkbox.addEventListener('click', e => {
+            e.stopPropagation(); // ⛔ bloque la propagation du clic vers le parent
           });
-        });
-      
-        // Fermer le menu si on clique ailleurs
+        
+          // Clic sur la zone "CGR ▼" (hors case) → ouvre/ferme le menu
+          toggle.addEventListener('click', e => {
+            // Ne pas déclencher si clic directement sur la case
+            if (e.target === checkbox) return;
+            e.preventDefault();
+            dropdown.classList.toggle('active');
+          });
+        }
+        
+        // Fermer le menu si clic ailleurs
         document.addEventListener('click', e => {
           document.querySelectorAll('.dropdown.active').forEach(d => {
             if (!d.contains(e.target)) d.classList.remove('active');
           });
-        });
-      
-        // Voir plus / Voir moins
-        document.addEventListener('click', e => {
-          if (e.target.classList.contains('toggle-btn')) {
-            const p = e.target.previousElementSibling;
-            p.classList.toggle('expanded');
-            e.target.classList.toggle('active');
-            e.target.textContent = p.classList.contains('expanded') ? 'Voir moins' : 'Voir plus';
-          }
         });
       })();
     </script>
