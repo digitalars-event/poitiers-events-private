@@ -234,9 +234,11 @@
         justify-content: flex-start;
         gap: 10px;
         font-size: 15px;
-        padding: 6px 0;
+        padding: 6px 10px;
         cursor: pointer;
         transition: background 0.2s;
+        width: 100%;
+        box-sizing: border-box;
       }
       
       .dropdown-content label:hover {
@@ -245,9 +247,23 @@
       }
       
       .dropdown-content input[type="checkbox"] {
-        accent-color: var(--brand);
-        transform: scale(1.1);
+          accent-color: var(--brand);
+          transform: scale(1.1);
+          flex-shrink: 0;
+          width: 20px; /* largeur fixe pour un alignement parfait */
+        }
+
+
+      .dropdown-content label span {
+        flex: 1;
+        text-align: left;
       }
+      
+      .dropdown-content label:hover {
+          background: #f6fdf9;
+          border-radius: 6px;
+        }
+
             
       .dropdown:hover .dropdown-content,
       .dropdown.active .dropdown-content {
