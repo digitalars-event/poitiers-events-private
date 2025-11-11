@@ -5,59 +5,20 @@ import json
 from datetime import datetime, timezone
 
 # --- Imports des scrapers ---
-from scrapers import cgr, arena, republic_corner, parc_expo, tap
+from scrapers import confort_moderne
 
 
 def main():
     all_events = []
 
-    # --- CGR ---
-    print("🎬 CGR...")
+    # --- CONFORT MODERNE ---
+    print("\n🎸 CONFORT MODERNE...")
     try:
-        cgr_events = cgr.scrape()
-        print(f"✅ {len(cgr_events)} événements récupérés depuis les cinémas CGR.")
-        all_events += cgr_events
+        confort_events = confort_moderne.scrape_confort_moderne()
+        print(f"✅ {len(confort_events)} événements récupérés depuis le Confort Moderne.")
+        all_events += confort_events
     except Exception as e:
-        print(f"❌ Erreur lors du scraping CGR : {e}")
-
-    # --- ARENA FUTUROSCOPE ---
-    print("\n🎤 ARENA FUTUROSCOPE...")
-    try:
-        arena_events = arena.scrape_arena()
-        print(f"✅ {len(arena_events)} événements récupérés depuis l'Arena Futuroscope.")
-        all_events += arena_events
-    except Exception as e:
-        print(f"❌ Erreur lors du scraping Arena : {e}")
-
-    # --- REPUBLIC CORNER ---
-    print("\n🎭 REPUBLIC CORNER...")
-    try:
-        rc_events = republic_corner.scrape_republic_corner()
-        print(f"✅ {len(rc_events)} événements récupérés depuis le Republic Corner.")
-        all_events += rc_events
-    except Exception as e:
-        print(f"❌ Erreur lors du scraping Republic Corner : {e}")
-
-    # --- PARC EXPO GRAND POITIERS ---
-    print("\n🏛️ PARC EXPO GRAND POITIERS...")
-    try:
-        expo_events = parc_expo.scrape_parc_expo()
-        print(f"✅ {len(expo_events)} événements récupérés depuis le Parc Expo Grand Poitiers.")
-        all_events += expo_events
-    except Exception as e:
-        print(f"❌ Erreur lors du scraping Parc Expo : {e}")
-
-    # --- TAP POITIERS ---
-    print("\n🎭 TAP POITIERS...")
-    try:
-        tap_data = tap.scrape_tap()
-        cinema_events = tap_data.get("cinema", [])
-        spectacle_events = tap_data.get("spectacle", [])
-        total_tap = len(cinema_events) + len(spectacle_events)
-        print(f"✅ {total_tap} événements récupérés depuis le TAP Poitiers ({len(cinema_events)} cinéma, {len(spectacle_events)} spectacles).")
-        all_events += cinema_events + spectacle_events
-    except Exception as e:
-        print(f"❌ Erreur lors du scraping TAP Poitiers : {e}")
+        print(f"❌ Erreur lors du scraping Confort Moderne : {e}")
 
     # --- Nettoyage des doublons ---
     seen = set()
@@ -103,12 +64,7 @@ def main():
     )
 
     # --- Résumé final ---
-    print("\n📊 RÉCAPITULATIF PAR SOURCE :")
-    print(f"   🎬 CGR : {len(locals().get('cgr_events', []))}")
-    print(f"   🎤 Arena : {len(locals().get('arena_events', []))}")
-    print(f"   🎭 Republic Corner : {len(locals().get('rc_events', []))}")
-    print(f"   🏛️ Parc Expo : {len(locals().get('expo_events', []))}")
-    print(f"   🎭 TAP Poitiers : {len(locals().get('cinema_events', [])) + len(locals().get('spectacle_events', []))}")
+    print(f"   🎸 Confort Moderne : {len(locals().get('confort_events', []))}")
 
 
 if __name__ == "__main__":
