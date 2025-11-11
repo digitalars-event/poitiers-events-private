@@ -5,7 +5,7 @@ import json
 import re
 import locale
 
-# --- Forcer la locale française (utile pour noms de mois)
+# --- Locale française
 try:
     locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
 except:
@@ -13,10 +13,7 @@ except:
 
 
 def normalize_date(day_text: str, month_text: str):
-    """
-    Convertit un jour et un mois français en date ISO (YYYY-MM-DDT20:00:00)
-    si possible. Ignore les expressions comme 'jusqu'au' ou 'à partir du'.
-    """
+    """Convertit un jour et un mois français en ISO si possible."""
     if not day_text or not month_text:
         return None
 
@@ -26,11 +23,11 @@ def normalize_date(day_text: str, month_text: str):
         "septembre": 9, "octobre": 10, "novembre": 11, "décembre": 12
     }
 
-    # Cas non normalisables
+    # Ignore “jusqu’au” ou “à partir du”
     if "jusqu" in day_text.lower() or "partir" in day_text.lower():
         return None
 
-    # Extraire le numéro du jour
+    # Extraire le jour
     m = re.search(r"(\d{1,2})", day_text)
     if not m:
         return None
@@ -40,9 +37,9 @@ def normalize_date(day_text: str, month_text: str):
     if not month:
         return None
 
-    # Déterminer l’année (ex: janvier -> année suivante quand on est en novembre)
     now = datetime.now()
     year = now.year
+    # Exemple : janvier en novembre → année suivante
     if month < now.month - 3:
         year += 1
 
@@ -54,8 +51,10 @@ def normalize_date(day_text: str, month_text: str):
 
 
 def clean_text(text):
-    """Nettoie les espaces et retours de ligne superflus."""
-    return re.sub(r"\s+", " ", text or "").strip()
+    """Nettoie les espaces et caractères parasites."""
+    if not text:
+        return ""
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def scrape_confort_moderne():
@@ -72,56 +71,60 @@ def scrape_confort_moderne():
 
         for row in rows:
             cols = row.find_all("td")
-            if not cols:
-                continue
+            if not cols or len(cols) < 3:
+                continue  # ligne vide ou non pertinente
 
-            # --- Mois (1ère colonne, ex: NOVEMBRE, DÉCEMBRE)
-            month_td = cols[0]
-            month_text = month_td.get_text(strip=True)
+            # --- Mois (première colonne)
+            month_td = cols[0] if len(cols) > 0 else None
+            month_text = clean_text(month_td.get_text()) if month_td else ""
             if month_text:
-                current_month = month_text  # mémoriser le mois courant
+                current_month = month_text
 
-            # --- Date ou période
+            # --- Date
             date_td = cols[1] if len(cols) > 1 else None
-            date_text = clean_text(date_td.get_text(" ", strip=True)) if date_td else ""
+            date_text = clean_text(date_td.get_text()) if date_td else ""
+            if not date_text and not current_month:
+                continue  # ligne vide inutile
 
-            # --- Image (background-image)
+            # --- Image (fond d’une div)
             img_td = row.select_one("td.img-table .img_filter")
             poster = None
             if img_td and "background-image" in img_td.get("style", ""):
-                match = re.search(r"url\(['\"]?(.*?)['\"]?\)", img_td["style"])
+                match = re.search(r"url\\(['\"]?(.*?)['\"]?\\)", img_td["style"])
                 if match:
                     poster = match.group(1)
 
-            # --- Titre et description (artistes)
+            # --- Titre principal
             title_tag = row.select_one("td a.clic")
             title = clean_text(title_tag.get_text()) if title_tag else "Sans titre"
+
+            # --- Description (artistes)
             description_span = row.select_one("td span span")
             description = clean_text(description_span.get_text()) if description_span else None
 
-            # --- Type (Concert, Expo...)
+            # --- Type (Concert, Expo, etc.)
             type_td = cols[-2] if len(cols) >= 5 else None
             type_event = clean_text(type_td.get_text()) if type_td else None
 
-            # --- Lieu (dernière colonne)
+            # --- Lieu
             location_td = cols[-1] if len(cols) >= 6 else None
             location = clean_text(location_td.get_text()) or "Confort Moderne, Poitiers"
 
-            # --- Lien source
+            # --- Source (onclick ou lien)
+            source = url
             onclick = row.get("onclick")
-            if onclick and "location.href=" in onclick:
+            if onclick and "location.href" in onclick:
                 match = re.search(r"location\\.href='(.*?)'", onclick)
-                source = match.group(1) if match else url
-            else:
-                link_tag = row.select_one("a.clic")
-                source = link_tag["href"] if link_tag and "href" in link_tag.attrs else url
+                if match:
+                    source = match.group(1)
+            elif title_tag and title_tag.get("href"):
+                source = title_tag["href"]
 
-            # --- Date complète (texte et ISO)
-            month_lower = (current_month or "").strip().lower()
-            full_date = f"{month_lower} {date_text}".strip()
-            iso_date = normalize_date(date_text, month_lower)
+            # --- Fusion mois + jour
+            full_date = f"{current_month or ''} {date_text}".strip()
+            iso_date = normalize_date(date_text, current_month or "")
 
-            # --- Formater la date lisible proprement
+            # --- Format lisible
             pretty_date = f"{date_text.capitalize()} {current_month.capitalize()}" if current_month else date_text
 
             events.append({
@@ -137,9 +140,8 @@ def scrape_confort_moderne():
                 "scraped_at": datetime.now().isoformat()
             })
 
-        # --- Supprimer les doublons
-        unique = []
-        seen = set()
+        # --- Suppression doublons
+        unique, seen = [], set()
         for ev in events:
             key = (ev["title"].lower(), ev["date"].lower())
             if key not in seen:
