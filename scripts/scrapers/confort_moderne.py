@@ -5,14 +5,18 @@ import json
 import re
 import locale
 
-# Force locale française (si dispo)
+# --- Forcer la locale française (utile pour noms de mois)
 try:
     locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
 except:
     pass
 
+
 def normalize_date(day_text: str, month_text: str):
-    """Convertit un jour et un mois français en date ISO si possible."""
+    """
+    Convertit un jour et un mois français en date ISO (YYYY-MM-DDT20:00:00)
+    si possible. Ignore les expressions comme 'jusqu'au' ou 'à partir du'.
+    """
     if not day_text or not month_text:
         return None
 
@@ -22,11 +26,11 @@ def normalize_date(day_text: str, month_text: str):
         "septembre": 9, "octobre": 10, "novembre": 11, "décembre": 12
     }
 
-    # Ignore si c’est une expression type “jusqu’au” ou “à partir du”
+    # Cas non normalisables
     if "jusqu" in day_text.lower() or "partir" in day_text.lower():
         return None
 
-    # Extraire le jour
+    # Extraire le numéro du jour
     m = re.search(r"(\d{1,2})", day_text)
     if not m:
         return None
@@ -36,17 +40,22 @@ def normalize_date(day_text: str, month_text: str):
     if not month:
         return None
 
-    # Suppose l’année actuelle ou suivante selon le mois
+    # Déterminer l’année (ex: janvier -> année suivante quand on est en novembre)
     now = datetime.now()
     year = now.year
-    if month < now.month - 3:  # exemple: janvier quand on est en novembre
+    if month < now.month - 3:
         year += 1
 
     try:
-        dt = datetime(year, month, day, 20, 0, 0)  # 20h par défaut
+        dt = datetime(year, month, day, 20, 0, 0)
         return dt.isoformat()
     except Exception:
         return None
+
+
+def clean_text(text):
+    """Nettoie les espaces et retours de ligne superflus."""
+    return re.sub(r"\s+", " ", text or "").strip()
 
 
 def scrape_confort_moderne():
@@ -66,16 +75,17 @@ def scrape_confort_moderne():
             if not cols:
                 continue
 
-            # --- Mois (souvent 1ère colonne, ex: NOVEMBRE, DÉCEMBRE)
+            # --- Mois (1ère colonne, ex: NOVEMBRE, DÉCEMBRE)
             month_td = cols[0]
-            if month_td and month_td.get_text(strip=True):
-                current_month = month_td.get_text(strip=True)
+            month_text = month_td.get_text(strip=True)
+            if month_text:
+                current_month = month_text  # mémoriser le mois courant
 
-            # --- Date / période
+            # --- Date ou période
             date_td = cols[1] if len(cols) > 1 else None
-            date_text = date_td.get_text(" ", strip=True) if date_td else ""
+            date_text = clean_text(date_td.get_text(" ", strip=True)) if date_td else ""
 
-            # --- Image (fond de div.img_filter)
+            # --- Image (background-image)
             img_td = row.select_one("td.img-table .img_filter")
             poster = None
             if img_td and "background-image" in img_td.get("style", ""):
@@ -84,38 +94,40 @@ def scrape_confort_moderne():
                     poster = match.group(1)
 
             # --- Titre et description (artistes)
-            title_td = row.select_one("td a.clic")
-            title = title_td.get_text(strip=True) if title_td else "Sans titre"
+            title_tag = row.select_one("td a.clic")
+            title = clean_text(title_tag.get_text()) if title_tag else "Sans titre"
             description_span = row.select_one("td span span")
-            description = description_span.get_text(strip=True) if description_span else None
+            description = clean_text(description_span.get_text()) if description_span else None
 
             # --- Type (Concert, Expo...)
             type_td = cols[-2] if len(cols) >= 5 else None
-            type_event = type_td.get_text(strip=True) if type_td else None
+            type_event = clean_text(type_td.get_text()) if type_td else None
 
-            # --- Lieu (dernière colonne souvent)
+            # --- Lieu (dernière colonne)
             location_td = cols[-1] if len(cols) >= 6 else None
-            location = location_td.get_text(strip=True) if location_td else "Confort Moderne, Poitiers"
+            location = clean_text(location_td.get_text()) or "Confort Moderne, Poitiers"
 
-            # --- Lien source (onclick ou <a>)
+            # --- Lien source
             onclick = row.get("onclick")
             if onclick and "location.href=" in onclick:
-                match = re.search(r"location\.href='(.*?)'", onclick)
+                match = re.search(r"location\\.href='(.*?)'", onclick)
                 source = match.group(1) if match else url
             else:
                 link_tag = row.select_one("a.clic")
                 source = link_tag["href"] if link_tag and "href" in link_tag.attrs else url
 
-            # --- Concatène mois + jour
-            full_date = f"{current_month or ''} {date_text}".strip()
+            # --- Date complète (texte et ISO)
+            month_lower = (current_month or "").strip().lower()
+            full_date = f"{month_lower} {date_text}".strip()
+            iso_date = normalize_date(date_text, month_lower)
 
-            # --- Conversion ISO si possible
-            iso_date = normalize_date(date_text, current_month or "")
+            # --- Formater la date lisible proprement
+            pretty_date = f"{date_text.capitalize()} {current_month.capitalize()}" if current_month else date_text
 
             events.append({
                 "title": title,
-                "date": full_date,               # ex: "novembre vendredi 14"
-                "release": iso_date,             # ex: "2025-11-14T20:00:00"
+                "date": pretty_date,
+                "release": iso_date,
                 "poster": poster,
                 "description": description,
                 "cinema": "Confort Moderne",
@@ -125,7 +137,7 @@ def scrape_confort_moderne():
                 "scraped_at": datetime.now().isoformat()
             })
 
-        # Nettoyage des doublons
+        # --- Supprimer les doublons
         unique = []
         seen = set()
         for ev in events:
