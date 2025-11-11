@@ -370,6 +370,24 @@
         return text.replace(/^.*?(dimanche|lundi|mardi|mercredi|jeudi|vendredi|samedi)/i, '$1');
       }
 
+      function bindToggleButtons(){
+        // Retire les anciens écouteurs en clonant
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+          btn.replaceWith(btn.cloneNode(true));
+        });
+      
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const content = btn.closest('.content');
+            const p = content ? content.querySelector('.synopsis') : null;
+            if (!p) return;
+            const expanded = p.classList.toggle('expanded');
+            btn.classList.toggle('active', expanded);
+            btn.textContent = expanded ? 'Voir moins' : 'Voir plus';
+          });
+        });
+      }
+
       /* === RENDER ALL (intégralement conservée) === */
       function renderAll(events) {
         const grids = {
@@ -380,7 +398,11 @@
           TAP: document.getElementById('gridTAP'),
           CM: document.getElementById('gridCM')   // 👈 AJOUT
         };
-        Object.values(grids).forEach(g => g.innerHTML = '');
+        Object.values(grids).forEach(g => {
+          g.innerHTML = '';
+          g.style.transform = 'translateX(0px)';
+          g.dataset.offset = 0;
+        });
 
         // 🎬 CGR
         events.filter(ev => ev.cinema?.includes('CGR')).forEach(ev => {
@@ -474,12 +496,12 @@
                 <button class="toggle-btn">Voir plus</button>
               </div>
               <div class="actions">
-                <a class="ghost" href="${ev.source}" target="_blank">Site TAP Cinéma</a
                 <a class="ghost" href="${ev.source}" target="_blank">Site TAP Cinéma</a>
                 <a class="btn" href="${ev.source}" target="_blank">Voir le film</a>
               </div>
             </article>`);
         });
+
 
         // 🎭 TAP SPECTACLES (avec badge J-X)
         events.filter(ev => ev.cinema === 'TAP Poitiers').forEach(ev => {
@@ -572,26 +594,6 @@
           renderAll(filtered);
           setupCarousels();
         });
-
-        function bindToggleButtons(){
-          // Délie et relie proprement à chaque rendu
-          document.querySelectorAll('.toggle-btn').forEach(btn => {
-            // Evite les doublons d'écouteurs
-            btn.replaceWith(btn.cloneNode(true));
-          });
-        
-          document.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-              const content = btn.closest('.content');
-              const p = content ? content.querySelector('.synopsis') : null;
-              if(!p) return;
-              const expanded = p.classList.toggle('expanded');
-              btn.classList.toggle('active', expanded);
-              btn.textContent = expanded ? 'Voir moins' : 'Voir plus';
-            });
-          });
-        }
-        
 
         // Filtres par lieu
         document.querySelectorAll('.filters input[type="checkbox"]').forEach(cb => {
