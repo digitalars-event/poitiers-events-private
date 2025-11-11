@@ -519,13 +519,6 @@
         const cgrSubs = Array.from(document.querySelectorAll('.dropdown-content input[type="checkbox"]'));
         const activeCGRSubs = cgrSubs.filter(cb => cb.checked).map(cb => cb.value);
       
-        // 🎯 Synchronisation auto du CGR principal
-        if (activeCGRSubs.length === 0) {
-          cgrGlobal.checked = false;
-        } else {
-          cgrGlobal.checked = true;
-        }
-      
         const filtered = allEvents.filter(ev => {
           const textMatch =
             ev.title?.toLowerCase().includes(query) ||
@@ -534,18 +527,21 @@
       
           let match = false;
       
-          // 🎬 Gestion CGR précise
+          // 🎬 Gestion CGR
           if (ev.cinema?.startsWith('CGR')) {
-            if (cgrGlobal.checked && activeCGRSubs.length === 0) {
-              // CGR global seul → on affiche tout
-              match = true;
-            } else {
-              // Sinon : on affiche seulement les sous-cinémas cochés
-              match = activeCGRSubs.includes(ev.cinema);
-            }
+            // Si le global est décoché → tout masquer
+            if (!cgrGlobal.checked) return false;
+      
+            // Si global coché + aucun sous-ciné coché → tout afficher
+            if (activeCGRSubs.length === 0) return true;
+      
+            // Sinon : afficher seulement les sous-cinés cochés
+            match = activeCGRSubs.includes(ev.cinema);
           } else {
-            // Autres cinémas
-            match = checkedValues.some(f => ev.cinema?.toLowerCase().includes(f.toLowerCase()));
+            // Autres cinés
+            match = checkedValues.some(f =>
+              ev.cinema?.toLowerCase().includes(f.toLowerCase())
+            );
           }
       
           return textMatch && match;
@@ -571,27 +567,27 @@
           });
         }
 
-                // Synchronisation CGR principal ↔ sous-catégories
+        // Synchronisation CGR principal ↔ sous-catégories
         function bindCGRLogic() {
           const cgrGlobal = document.querySelector('.dropdown-toggle input[value="CGR"]');
-          const cgrSubs = document.querySelectorAll('.dropdown-content input[type="checkbox"]');
+          const cgrSubs = Array.from(document.querySelectorAll('.dropdown-content input[type="checkbox"]'));
         
-          // Si on clique sur le CGR global → active/désactive tous les sous-cinés
+          // ✅ Clic sur le CGR global → coche/décoche tous les sous-cinés
           cgrGlobal.addEventListener('change', () => {
             cgrSubs.forEach(cb => (cb.checked = cgrGlobal.checked));
             filterEvents();
           });
         
-          // Si on coche/décoche un sous-ciné → met à jour l’état du global
+          // ✅ Clic sur un sous-ciné → met à jour l’état du global
           cgrSubs.forEach(cb => {
             cb.addEventListener('change', () => {
-              const allUnchecked = Array.from(cgrSubs).every(sub => !sub.checked);
-              cgrGlobal.checked = !allUnchecked;
+              const anyChecked = cgrSubs.some(sub => sub.checked);
+              cgrGlobal.checked = anyChecked; // Si aucun sous-ciné → global décoché
               filterEvents();
             });
           });
         }
-        
+                
         bindFilterListeners();
         bindCGRLogic();
         setupDropdownToggle();
@@ -603,16 +599,15 @@
           const toggle = dropdown.querySelector('.dropdown-toggle');
           const checkbox = toggle.querySelector('input[type="checkbox"]');
         
-          // ✅ Clic sur la case CGR → coche/décoche et filtre normalement
+          // Clic sur la case → juste filtrer (sans ouvrir le menu)
           checkbox.addEventListener('click', e => {
-            e.stopPropagation(); // Empêche juste l’ouverture du menu
-            // Laisse le navigateur changer la case, puis filtre
+            e.stopPropagation();
             setTimeout(() => filterEvents(), 50);
           });
         
-          // ✅ Clic sur le bloc (hors case) → ouvre/ferme le menu
+          // Clic sur le bloc "CGR ▼" (hors case) → ouvrir / fermer
           toggle.addEventListener('click', e => {
-            if (e.target === checkbox) return; // Ignorer si clic sur la case
+            if (e.target === checkbox) return;
             e.preventDefault();
             dropdown.classList.toggle('active');
           });
