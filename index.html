@@ -403,7 +403,7 @@
           const desc = ev.description || ev.synopsis || '—';
           grids.CGR.insertAdjacentHTML('beforeend', `
             <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
+              <div class="cover" style="background-image:url('${poster}');"><div class="badge">Actuellement à l'affiche</div></div>
               <div class="content">
                 <h3>${ev.title}</h3>
                 <div class="meta">${ev.cinema} · ${genres} · ${ev.duration || 'Durée inconnue'}</div>
