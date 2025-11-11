@@ -11,6 +11,7 @@ try:
 except:
     pass
 
+
 def normalize_date(day_text: str, month_text: str):
     """Convertit un jour et un mois français en date ISO si possible."""
     if not day_text or not month_text:
@@ -112,6 +113,7 @@ def scrape_confort_moderne():
             # --- Conversion ISO si possible
             iso_date = normalize_date(date_text, current_month or "")
 
+            # --- Enregistrement
             events.append({
                 "title": title,
                 "date": full_date,               # ex: "novembre vendredi 14"
@@ -125,16 +127,16 @@ def scrape_confort_moderne():
                 "scraped_at": datetime.now().isoformat()
             })
 
-        # Nettoyage des doublons
-        unique = []
+        # ✅ Suppression douce des doublons sans changer l’ordre
         seen = set()
+        unique = []
         for ev in events:
             key = (ev["title"].lower(), ev["date"].lower())
             if key not in seen:
                 seen.add(key)
                 unique.append(ev)
 
-        print(f"🎸 Confort Moderne : {len(unique)} événements collectés")
+        print(f"🎸 Confort Moderne : {len(unique)} événements collectés (ordre préservé)")
         return unique
 
     except Exception as e:
@@ -146,7 +148,7 @@ if __name__ == "__main__":
     data = scrape_confort_moderne()
     output = {
         "generated_at": datetime.now().isoformat(),
-        "events": data
+        "events": data  # 👈 Ordre inchangé
     }
 
     with open("events.json", "w", encoding="utf-8") as f:
