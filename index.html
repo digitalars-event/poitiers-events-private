@@ -22,6 +22,7 @@
         background: var(--bg);
         color: var(--text);
         font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial;
+        overflow-x: hidden; /* ✅ empêche tout scroll horizontal */
       }
 
       .hero {
@@ -118,6 +119,7 @@
       }
 
       .wrap {
+        overflow: hidden; /* ✅ empêche les débordements internes de créer du scroll */
         max-width: 1200px;
         margin: 0 auto;
         padding: 0 16px;
