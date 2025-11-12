@@ -359,7 +359,31 @@
       .dropdown.active .dropdown-toggle::after {
         transform: rotate(180deg);
       }
+
+      /* === VERSION MOBILE : carrousel tactile === */
+      @media (max-width: 768px) {
+        .carousel-btn {
+          display: none !important; /* ❌ cache les flèches sur mobile */
+        }
       
+        .grid {
+          overflow-x: auto;           /* ✅ active le scroll horizontal tactile */
+          scroll-snap-type: x mandatory; /* ✅ effet de "snap" fluide */
+          -webkit-overflow-scrolling: touch; /* ✅ inertie iOS */
+          gap: 12px;
+          padding-bottom: 10px; /* espace pour éviter les coupures */
+        }
+      
+        .card {
+          scroll-snap-align: start; /* ✅ chaque carte se cale proprement */
+        }
+      
+        body {
+          overflow-x: hidden; /* ✅ évite le débordement global du body */
+        }
+      }
+      
+            
     </style>
   </head>
 
@@ -631,8 +655,10 @@
 
       /* === CARROUSEL FLUIDE === */
       function setupCarousels() {
+        // ✅ Ne pas activer les boutons sur mobile
+        if (window.innerWidth <= 768) return;
+        
         document.querySelectorAll('.carousel-btn').forEach(btn => {
-          // ✅ Retirer anciens écouteurs en remplaçant chaque bouton par un clone
           const newBtn = btn.cloneNode(true);
           btn.parentNode.replaceChild(newBtn, btn);
         });
