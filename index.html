@@ -272,8 +272,33 @@
         box-shadow: 0 20px 80px var(--brand);
       }
       
-      .carousel-btn.left  { left: -70px; transform: translateY(-50%) translateX(-50%); }
-      .carousel-btn.right { right: -70px; transform: translateY(-50%) translateX(50%); }
+      /* === Boutons latéraux responsives === */
+      .carousel-btn.left,
+      .carousel-btn.right {
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      
+      /* Position dynamique selon largeur du container */
+      .carousel-btn.left {
+        left: max(-3vw, -40px); /* s’ajuste avec la taille de l’écran */
+      }
+      
+      .carousel-btn.right {
+        right: max(-3vw, -40px);
+      }
+      
+      /* Si l’écran devient trop petit, rapproche automatiquement les flèches */
+      @media (max-width: 1300px) {
+        .carousel-btn.left { left: -20px; }
+        .carousel-btn.right { right: -20px; }
+      }
+      
+      @media (max-width: 1024px) {
+        .carousel-btn.left { left: -10px; }
+        .carousel-btn.right { right: -10px; }
+      }
+
 
       /* 🌿 Menu déroulant CGR corrigé */
       .dropdown {
