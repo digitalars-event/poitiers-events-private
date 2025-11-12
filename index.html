@@ -407,18 +407,29 @@
           RC: document.getElementById('gridRC'),
           Expo: document.getElementById('gridExpo'),
           TAP: document.getElementById('gridTAP'),
-          CM: document.getElementById('gridCM')   // 👈 AJOUT
+          CM: document.getElementById('gridCM')
         };
+      
         Object.values(grids).forEach(g => {
           g.innerHTML = '';
           g.style.transform = 'translateX(0px)';
           g.dataset.offset = 0;
         });
-
-        // 🎬 CGR
+      
+        // --- FONCTION UTILITAIRE : met à jour la visibilité des flèches ---
+        function updateCarouselVisibility(key) {
+          const container = grids[key]?.closest('.carousel-container');
+          if (!container) return;
+          const hasCards = grids[key]?.children.length > 0;
+          container.querySelectorAll('.carousel-btn').forEach(btn => {
+            btn.style.display = hasCards ? 'flex' : 'none';
+          });
+          container.previousElementSibling.style.display = hasCards ? 'block' : 'none'; // cache le titre
+        }
+      
+        // === CGR ===
         events.filter(ev => ev.cinema?.includes('CGR')).forEach(ev => {
           const poster = ev.poster || ev.image || '';
-          const rel = daysUntil(ev.release);
           const genres = ev.genres || 'Genres non précisés';
           const desc = ev.description || ev.synopsis || '—';
           grids.CGR.insertAdjacentHTML('beforeend', `
@@ -436,15 +447,15 @@
               </div>
             </article>`);
         });
-
-        // 🎤 ARENA
+        updateCarouselVisibility('CGR');
+      
+        // === ARENA ===
         events.filter(ev => ev.cinema?.includes('Arena')).forEach(ev => {
           const poster = ev.poster || ev.image || '';
-          const rel = daysUntil(ev.release);
           const date = cleanArenaDate(ev.date);
           grids.Arena.insertAdjacentHTML('beforeend', `
             <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
+              <div class="cover" style="background-image:url('${poster}');"></div>
               <div class="content">
                 <h3>${ev.title}</h3>
                 <div class="meta">Arena Futuroscope · ${date}</div>
@@ -455,14 +466,14 @@
               </div>
             </article>`);
         });
-
-        // 🎭 REPUBLIC CORNER
+        updateCarouselVisibility('Arena');
+      
+        // === REPUBLIC CORNER ===
         events.filter(ev => ev.cinema?.includes('Republic')).forEach(ev => {
           const poster = ev.poster || '';
-          const rel = daysUntil(ev.date);
           grids.RC.insertAdjacentHTML('beforeend', `
             <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
+              <div class="cover" style="background-image:url('${poster}');"></div>
               <div class="content">
                 <h3>${ev.title}</h3>
                 <div class="meta">${ev.address || 'Espace Republic Corner, Poitiers'}</div>
@@ -473,14 +484,14 @@
               </div>
             </article>`);
         });
-
-        // 🏛️ PARC EXPO
+        updateCarouselVisibility('RC');
+      
+        // === PARC EXPO ===
         events.filter(ev => ev.cinema?.includes('Parc Expo')).forEach(ev => {
           const poster = ev.poster || '';
-          const rel = daysUntil(ev.date);
           grids.Expo.insertAdjacentHTML('beforeend', `
             <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">${rel ? `<div class="badge">${rel}</div>` : ''}</div>
+              <div class="cover" style="background-image:url('${poster}');"></div>
               <div class="content">
                 <h3>${ev.title}</h3>
                 <div class="meta">Parc Expo Grand Poitiers</div>
@@ -491,70 +502,44 @@
               </div>
             </article>`);
         });
-
-        // 🎭 TAP CINÉMA
-        events.filter(ev => ev.cinema?.includes('TAP Cinéma')).forEach(ev => {
+        updateCarouselVisibility('Expo');
+      
+        // === TAP ===
+        events.filter(ev => ev.cinema?.includes('TAP')).forEach(ev => {
           const poster = ev.poster || '';
-          const genres = ev.genres || 'Genres non précisés';
-          const desc = ev.description || '—';
           grids.TAP.insertAdjacentHTML('beforeend', `
             <article class="card">
               <div class="cover" style="background-image:url('${poster}');"></div>
               <div class="content">
                 <h3>${ev.title}</h3>
-                <div class="meta">${ev.cinema} · ${genres} · ${ev.duration || 'Durée inconnue'}</div>
-                <p class="synopsis">${desc}</p>
-                <button class="toggle-btn">Voir plus</button>
-              </div>
-              <div class="actions">
-                <a class="ghost" href="${ev.source}" target="_blank">Site TAP Cinéma</a>
-                <a class="btn" href="${ev.source}" target="_blank">Voir le film</a>
-              </div>
-            </article>`);
-        });
-
-
-        // 🎭 TAP SPECTACLES (avec badge J-X)
-        events.filter(ev => ev.cinema === 'TAP Poitiers').forEach(ev => {
-          const poster = ev.poster || '';
-          const date = cleanArenaDate(ev.date);
-          const rel = daysUntilText(ev.date);
-          grids.TAP.insertAdjacentHTML('beforeend', `
-            <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">
-                ${rel ? `<div class="badge">${rel}</div>` : ''}
-              </div>
-              <div class="content">
-                <h3>${ev.title}</h3>
-                <div class="meta">TAP Poitiers · ${date}</div>
+                <div class="meta">${ev.cinema}</div>
               </div>
               <div class="actions">
                 <a class="ghost" href="${ev.source}" target="_blank">Plus d'infos</a>
-                <a class="btn" href="${ev.reservation || ev.source}" target="_blank">Réserver</a>
+                <a class="btn" href="${ev.source}" target="_blank">Voir</a>
               </div>
             </article>`);
         });
-
-        // 🎸 CONFORT MODERNE (même visuel que TAP spectacles)
-        events.filter(ev => ev.cinema === 'Confort Moderne').forEach(ev => {
+        updateCarouselVisibility('TAP');
+      
+        // === CONFORT MODERNE ===
+        events.filter(ev => ev.cinema?.includes('Confort Moderne')).forEach(ev => {
           const poster = ev.poster || '';
-          const date = cleanArenaDate(ev.date);
-          const rel = daysUntilText(ev.date);
           grids.CM.insertAdjacentHTML('beforeend', `
             <article class="card">
-              <div class="cover" style="background-image:url('${poster}');">
-                ${rel ? `<div class="badge">${rel}</div>` : ''}
-              </div>
+              <div class="cover" style="background-image:url('${poster}');"></div>
               <div class="content">
                 <h3>${ev.title}</h3>
-                <div class="meta">Confort Moderne · ${date}</div>
+                <div class="meta">Confort Moderne</div>
               </div>
               <div class="actions">
                 <a class="ghost" href="${ev.source}" target="_blank">Plus d'infos</a>
-                <a class="btn" href="${ev.reservation || ev.source}" target="_blank">Réserver</a>
+                <a class="btn" href="${ev.source}" target="_blank">Réserver</a>
               </div>
             </article>`);
         });
+        updateCarouselVisibility('CM');
+      
         bindToggleButtons();
       }
 
