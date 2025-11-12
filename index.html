@@ -276,14 +276,74 @@
       .carousel-btn.left  { left: -70px; transform: translateY(-50%) translateX(-50%); }
       .carousel-btn.right { right: -70px; transform: translateY(-50%) translateX(50%); }
 
-
-
+      /* 🌿 Menu déroulant CGR */
+      .dropdown {
+        position: relative;
+        user-select: none;
+      }
+      
+      .dropdown-toggle {
+        align-items: center;
+        cursor: pointer;
+      }
+      
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        top: 110%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        padding: 10px 14px;
+        min-width: 200px;
+        z-index: 999;
+        text-align: left;
+      }
+      
+      .dropdown-content label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 15px;
+        padding: 6px 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      
+      .dropdown-content label:hover {
+        background: #f6fdf9;
+        border-radius: 6px;
+      }
+      
+      .dropdown-content input[type="checkbox"] {
+        accent-color: var(--brand);
+        transform: scale(1.1);
+        flex-shrink: 0;
+      }
+      
+      .dropdown:hover .dropdown-content,
+      .dropdown.active .dropdown-content {
+        display: block;
+      }
+      
+      .filters {
+        position: relative;
+        z-index: 5;
+      }
+      
       footer {
         text-align: center;
         color: var(--muted);
         font-size: 12px;
         margin: 40px 0;
       }
+
+      
     </style>
   </head>
 
@@ -293,7 +353,17 @@
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Rechercher un événement à Poitiers (ex : concert, film, humour...)" />
       <div class="filters">
-        <label class="filter-item"><input type="checkbox" value="CGR" checked /> 🎬 CGR</label>
+        <div class="filter-item dropdown">
+          <label class="dropdown-toggle">
+            <input type="checkbox" value="CGR" checked /> 🎬 CGR ▼
+          </label>
+          <div class="dropdown-content">
+            <label><input type="checkbox" value="CGR Castille" checked /> Castille</label>
+            <label><input type="checkbox" value="CGR Buxerolles" checked /> Buxerolles</label>
+            <label><input type="checkbox" value="CGR Fontaine-le-Comte" checked /> Fontaine-le-Comte</label>
+          </div>
+        </div>
+
         <label class="filter-item"><input type="checkbox" value="Arena" checked /> 🎤 Arena</label>
         <label class="filter-item"><input type="checkbox" value="Republic" checked /> 🎭 Republic Corner</label>
         <label class="filter-item"><input type="checkbox" value="Parc Expo" checked /> 🏛️ Parc Expo</label>
@@ -571,38 +641,94 @@
         });
       }
 
-      /* === INITIALISATION === */
-      (async function() {
-        const data = await loadEvents();
-        allEvents = data.events || [];
-
-        renderAll(allEvents);
-        setupCarousels();
-
-        // Recherche texte en direct
-        document.getElementById('searchInput').addEventListener('input', e => {
-          const query = e.target.value.toLowerCase();
-          const filtered = allEvents.filter(ev =>
+      function filterEvents() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const checkboxes = Array.from(document.querySelectorAll('.filters input[type="checkbox"]'));
+        const checkedValues = checkboxes.filter(cb => cb.checked).map(cb => cb.value);
+      
+        const cgrGlobal = document.querySelector('.dropdown-toggle input[value="CGR"]');
+        const cgrSubs = Array.from(document.querySelectorAll('.dropdown-content input[type="checkbox"]'));
+        const activeCGRSubs = cgrSubs.filter(cb => cb.checked).map(cb => cb.value);
+      
+        const filtered = allEvents.filter(ev => {
+          const textMatch =
             ev.title?.toLowerCase().includes(query) ||
             ev.description?.toLowerCase().includes(query) ||
-            ev.cinema?.toLowerCase().includes(query)
-          );
-          renderAll(filtered);
-          setupCarousels();
+            ev.cinema?.toLowerCase().includes(query);
+      
+          let match = false;
+      
+          // 🎬 Gestion CGR
+          if (ev.cinema?.startsWith('CGR')) {
+            if (!cgrGlobal.checked) return false;
+            if (activeCGRSubs.length === 0) return true;
+            match = activeCGRSubs.includes(ev.cinema);
+          } else {
+            match = checkedValues.some(f => ev.cinema?.toLowerCase().includes(f.toLowerCase()));
+          }
+      
+          return textMatch && match;
         });
+      
+        renderAll(filtered);
+        setupCarousels();
+      }
 
-        // Filtres par lieu
-        document.querySelectorAll('.filters input[type="checkbox"]').forEach(cb => {
-          cb.addEventListener('change', () => {
-            const active = Array.from(document.querySelectorAll('.filters input[type="checkbox"]:checked')).map(el => el.value);
-            const filtered = allEvents.filter(ev =>
-              active.some(a => ev.cinema?.toLowerCase().includes(a.toLowerCase()))
-            );
-            renderAll(filtered);
-            setupCarousels();
+      /* === INITIALISATION === */
+      (async function() {
+          const data = await loadEvents();
+          allEvents = data.events || [];
+        
+          renderAll(allEvents);
+          setupCarousels();
+        
+          // Recherche texte
+          document.getElementById('searchInput').addEventListener('input', filterEvents);
+        
+          // Filtres classiques
+          document.querySelectorAll('.filters input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', filterEvents);
           });
-        });
-      })();
+        
+          // 🔁 Synchronisation CGR principal ↔ sous-cinés
+          const cgrGlobal = document.querySelector('.dropdown-toggle input[value="CGR"]');
+          const cgrSubs = Array.from(document.querySelectorAll('.dropdown-content input[type="checkbox"]'));
+        
+          cgrGlobal.addEventListener('change', () => {
+            cgrSubs.forEach(cb => (cb.checked = cgrGlobal.checked));
+            filterEvents();
+          });
+        
+          cgrSubs.forEach(cb => {
+            cb.addEventListener('change', () => {
+              const anyChecked = cgrSubs.some(sub => sub.checked);
+              cgrGlobal.checked = anyChecked;
+              filterEvents();
+            });
+          });
+        
+          // 🔽 Gestion ouverture/fermeture menu dropdown
+          const dropdown = document.querySelector('.dropdown');
+          const toggle = dropdown.querySelector('.dropdown-toggle');
+          const checkbox = toggle.querySelector('input[type="checkbox"]');
+        
+          checkbox.addEventListener('click', e => {
+            e.stopPropagation();
+            setTimeout(() => filterEvents(), 50);
+          });
+        
+          toggle.addEventListener('click', e => {
+            if (e.target === checkbox) return;
+            e.preventDefault();
+            dropdown.classList.toggle('active');
+          });
+        
+          document.addEventListener('click', e => {
+            document.querySelectorAll('.dropdown.active').forEach(d => {
+              if (!d.contains(e.target)) d.classList.remove('active');
+            });
+          });
+        })();
     </script>
   </body>
 </html>
