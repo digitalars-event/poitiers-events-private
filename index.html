@@ -407,7 +407,25 @@
           overflow-x: hidden; /* ✅ évite le débordement global du body */
         }
       }
+
+      /* ✅ Correction du menu déroulant CGR sur mobile */
+      @media (max-width: 768px) {
+        .dropdown-content {
+          left: 0 !important;
+          right: 0 !important;
+          transform: none !important;
+          min-width: unset;
+          width: 90vw; /* prend 90% de la largeur de l’écran */
+          margin: 0 auto; /* centré visuellement */
+          border-radius: 10px;
+        }
       
+        .dropdown-content label {
+          justify-content: flex-start;
+          text-align: left;
+        }
+      }
+            
             
     </style>
   </head>
