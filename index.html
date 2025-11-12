@@ -276,31 +276,36 @@
       .carousel-btn.left  { left: -70px; transform: translateY(-50%) translateX(-50%); }
       .carousel-btn.right { right: -70px; transform: translateY(-50%) translateX(50%); }
 
-      /* 🌿 Menu déroulant CGR */
+      /* 🌿 Menu déroulant CGR corrigé */
       .dropdown {
         position: relative;
-        user-select: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
       
       .dropdown-toggle {
+        display: flex;
         align-items: center;
+        gap: 6px;
         cursor: pointer;
       }
       
       .dropdown-content {
         display: none;
+        flex-direction: column;
+        align-items: flex-start;
         position: absolute;
-        top: 110%;
+        top: calc(100% + 6px);
         left: 50%;
         transform: translateX(-50%);
-        background: white;
+        background: #fff;
         border: 1px solid var(--border);
         border-radius: 12px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         padding: 10px 14px;
         min-width: 200px;
         z-index: 999;
-        text-align: left;
       }
       
       .dropdown-content label {
@@ -308,16 +313,16 @@
         align-items: center;
         gap: 10px;
         font-size: 15px;
+        color: var(--text);
         padding: 6px 10px;
         cursor: pointer;
-        transition: background 0.2s;
+        transition: background 0.2s ease;
         width: 100%;
-        box-sizing: border-box;
+        border-radius: 6px;
       }
       
       .dropdown-content label:hover {
         background: #f6fdf9;
-        border-radius: 6px;
       }
       
       .dropdown-content input[type="checkbox"] {
@@ -328,9 +333,10 @@
       
       .dropdown:hover .dropdown-content,
       .dropdown.active .dropdown-content {
-        display: block;
+        display: flex;
       }
       
+      /* Pour éviter les débordements */
       .filters {
         position: relative;
         z-index: 5;
@@ -343,6 +349,21 @@
         margin: 40px 0;
       }
 
+      .dropdown-toggle input[type="checkbox"] {
+        margin-right: 4px;
+      }
+      
+      .dropdown-toggle::after {
+        content: "▼";
+        font-size: 11px;
+        color: var(--brand);
+        margin-left: 4px;
+        transition: transform 0.2s ease;
+      }
+      
+      .dropdown.active .dropdown-toggle::after {
+        transform: rotate(180deg);
+      }
       
     </style>
   </head>
