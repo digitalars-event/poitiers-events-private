@@ -634,30 +634,38 @@
       /* === CARROUSEL FLUIDE === */
       function setupCarousels() {
         document.querySelectorAll('.carousel-btn').forEach(btn => {
+          // ✅ Retirer anciens écouteurs en remplaçant chaque bouton par un clone
+          const newBtn = btn.cloneNode(true);
+          btn.parentNode.replaceChild(newBtn, btn);
+        });
+      
+        document.querySelectorAll('.carousel-btn').forEach(btn => {
+          newBtn = btn; // référence au nouveau bouton
           btn.addEventListener('click', () => {
             const targetId = btn.dataset.target;
             const grid = document.getElementById(targetId);
             if (!grid) return;
-
+      
             const container = grid.closest('.carousel-container');
             const visibleWidth = container.offsetWidth;
             const scrollAmount = visibleWidth * 0.9;
-
+      
             const current = parseFloat(grid.dataset.offset || 0);
             let next = current;
-
+      
             if (btn.classList.contains('left')) {
               next = Math.min(current + scrollAmount, 0);
             } else {
               const maxScroll = -(grid.scrollWidth - visibleWidth);
               next = Math.max(current - scrollAmount, maxScroll);
             }
-
+      
             grid.style.transform = `translateX(${next}px)`;
             grid.dataset.offset = next;
           });
         });
       }
+
 
       function filterEvents() {
         const query = document.getElementById('searchInput').value.toLowerCase();
