@@ -136,10 +136,11 @@
       /* === CARROUSELS === */
       .carousel-container {
         position: relative;
-        overflow: visible;     /* ✅ permet de voir les flèches hors du cadre */
+        overflow: visible; /* ✅ indispensable pour voir les flèches à l’extérieur */
         width: 100%;
-        padding: 0 24px;
+        padding: 0 0; /* ✅ supprime les marges internes pour un alignement plus net */
       }
+
 
       .grid {
         display: flex;
@@ -252,9 +253,10 @@
         background: rgba(255,255,255,0.95);
         border: 1px solid var(--border);
         border-radius: 50%;
-        width: 38px;
-        height: 38px;
-        font-size: 22px;
+        width: 44px;
+        height: 44px;
+        font-size: 24px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         color: var(--brand);
         cursor: pointer;
         display: flex;
@@ -266,8 +268,9 @@
 
       .carousel-btn:hover { background: var(--brand); color: white; }
       /* Flèches à l'intérieur du conteneur, plus coupées */
-      .carousel-btn.left  { left: -50px; }   /* 🡐 décalée vers l’extérieur du carrousel */
-      .carousel-btn.right { right: -50px; }  /* 🡒 décalée vers l’extérieur du carrousel */
+      .carousel-btn.left  { left: -70px; transform: translateY(-50%) translateX(-50%); }
+      .carousel-btn.right { right: -70px; transform: translateY(-50%) translateX(50%); }
+
 
 
       footer {
