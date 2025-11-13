@@ -433,46 +433,49 @@
         }
       }
 
+     /* === VERSION MOBILE LISIBLES DES FILTRES === */
       @media (max-width: 768px) {
+      
+        /* La zone filtre devient un carrousel horizontal propre */
         .filters {
           display: flex;
-          flex-wrap: nowrap;  /* ❌ Plus de retour à la ligne */
-          overflow-x: auto;   /* ✔ Scroll horizontal */
+          flex-wrap: nowrap;     /* tous sur UNE seule ligne */
+          overflow-x: auto;
+          overflow-y: hidden;
           gap: 8px;
-          padding-bottom: 6px;
           width: 100%;
-          scrollbar-width: none; /* Firefox */
+          padding: 6px 0;
+          scrollbar-width: none;
         }
         .filters::-webkit-scrollbar {
-          display: none; /* Chrome */
+          display: none;
         }
+      
+        /* Chaque filtre devient une pill claire, lisible, compacte */
         .filter-item {
-          white-space: nowrap; /* ✔ les boutons deviennent compacts */
-          flex-shrink: 0;       /* ✔ évite qu'ils s'étirent */
+          flex-shrink: 0;              /* ne se compresse pas trop */
+          padding: 6px 12px;           /* assez large pour le texte */
+          font-size: 13px;             /* lisible */
+          white-space: nowrap;         /* pas de coupe */
+          border-radius: 20px;         /* style moderne */
         }
-      }
-
-      @media (max-width: 768px) {
+      
+        /* Le dropdown (CGR) doit aussi avoir une largeur fixe */
+        .dropdown {
+          flex-shrink: 0;
+        }
+      
+        /* Barre de recherche compacte */
         .search-bar {
-          padding: 8px 12px;
-          background: rgba(247, 247, 247, 0.94); /* plus fin et léger */
-          backdrop-filter: blur(4px);
+          padding: 10px 12px;
         }
+      
         .search-bar input {
-          margin-bottom: 6px;
-          padding: 8px 10px;
+          padding: 10px;
           font-size: 14px;
         }
       }
-
-      @media (max-width: 768px) {
-        .filter-item {
-          padding: 4px 8px;
-          font-size: 12px;
-          border-radius: 8px;
-        }
-      }
-    
+          
     </style>
   </head>
 
