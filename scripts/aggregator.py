@@ -56,7 +56,7 @@ def main():
     #    total_tap = len(cinema_events) + len(spectacle_events)
     #    print(f"✅ {total_tap} événements récupérés depuis le TAP Poitiers ({len(cinema_events)} cinéma, {len(spectacle_events)} spectacles).")
     #    all_events += cinema_events + spectacle_events
-   # except Exception as e:
+    #except Exception as e:
     #    print(f"❌ Erreur lors du scraping TAP Poitiers : {e}")
 
     # --- CONFORT MODERNE ---
@@ -68,14 +68,14 @@ def main():
    # except Exception as e:
    #     print(f"❌ Erreur lors du scraping Confort Moderne : {e}")
 
-        # --- Maison des 3 quartiers ---
-        print("\n🏡 MAISON DES 3 QUARTIERS (M3Q)...")
-        try:
-            m3q_events = m3q.scrape_m3q()   # ← appel correct
-            print(f"✅ {len(m3q_events)} événements récupérés depuis la M3Q.")
-            all_events += m3q_events
-        except Exception as e:
-            print(f"❌ Erreur lors du scraping M3Q : {e}")
+    # --- Maison des 3 quartiers ---
+    print("\n🏡 MAISON DES 3 QUARTIERS (M3Q)...")
+    try:
+        m3q_events = m3q.scrape_m3q()   # ← appel correct
+        print(f"✅ {len(m3q_events)} événements récupérés depuis la M3Q.")
+        all_events += m3q_events
+    except Exception as e:
+        print(f"❌ Erreur lors du scraping M3Q : {e}")
 
     # --- Nettoyage des doublons ---
     seen = set()
