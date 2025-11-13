@@ -432,49 +432,6 @@
           text-align: left;
         }
       }
-
-     /* === VERSION MOBILE LISIBLES DES FILTRES === */
-      @media (max-width: 768px) {
-      
-        /* La zone filtre devient un carrousel horizontal propre */
-        .filters {
-          display: flex;
-          flex-wrap: nowrap;     /* tous sur UNE seule ligne */
-          overflow-x: auto;
-          overflow-y: hidden;
-          gap: 8px;
-          width: 100%;
-          padding: 6px 0;
-          scrollbar-width: none;
-        }
-        .filters::-webkit-scrollbar {
-          display: none;
-        }
-      
-        /* Chaque filtre devient une pill claire, lisible, compacte */
-        .filter-item {
-          flex-shrink: 0;              /* ne se compresse pas trop */
-          padding: 6px 12px;           /* assez large pour le texte */
-          font-size: 13px;             /* lisible */
-          white-space: nowrap;         /* pas de coupe */
-          border-radius: 20px;         /* style moderne */
-        }
-      
-        /* Le dropdown (CGR) doit aussi avoir une largeur fixe */
-        .dropdown {
-          flex-shrink: 0;
-        }
-      
-        /* Barre de recherche compacte */
-        .search-bar {
-          padding: 10px 12px;
-        }
-      
-        .search-bar input {
-          padding: 10px;
-          font-size: 14px;
-        }
-      }
           
     </style>
   </head>
