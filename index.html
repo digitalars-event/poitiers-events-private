@@ -452,6 +452,7 @@
         <label class="filter-item"><input type="checkbox" value="Parc Expo" checked />Parc Expo</label>
         <label class="filter-item"><input type="checkbox" value="TAP" checked />TAP Poitiers</label>
         <label class="filter-item"><input type="checkbox" value="Confort Moderne" checked />Confort Moderne</label>
+        <label class="filter-item"><input type="checkbox" value="Confort Moderne" checked />Maison des 3 Quartiers</label>
       </div>
     </div>
 
@@ -497,6 +498,15 @@
         <section class="grid" id="gridCM"></section>
         <button class="carousel-btn right" data-target="gridCM">›</button>
       </div>
+
+      <h2 class="section-title">🏢 Maison des 3 Quartiers</h2>
+      <div class="carousel-container">
+        <button class="carousel-btn left" data-target="gridM3Q">‹</button>
+        <section class="grid" id="gridM3Q"></section>
+        <button class="carousel-btn right" data-target="gridM3Q">›</button>
+      </div>
+
+      
 
       <footer>✦ Données issues de <strong>events.json</strong>.</footer>
     </div>
@@ -560,7 +570,8 @@
           RC: document.getElementById('gridRC'),
           Expo: document.getElementById('gridExpo'),
           TAP: document.getElementById('gridTAP'),
-          CM: document.getElementById('gridCM')
+          CM: document.getElementById('gridCM'),
+          M3Q: document.getElementById('gridM3Q')
         };
       
         Object.values(grids).forEach(g => {
@@ -692,7 +703,25 @@
             </article>`);
         });
         updateCarouselVisibility('CM');
-      
+
+        // === MAISON DES 3 QUARTIERS ===
+        events.filter(ev => ev.cinema?.includes('Maison des 3 Quartiers')).forEach(ev => {
+          const poster = ev.poster || '';
+          grids.CM.insertAdjacentHTML('beforeend', `
+            <article class="card">
+              <div class="cover" style="background-image:url('${poster}');"></div>
+              <div class="content">
+                <h3>${ev.title}</h3>
+                <div class="meta">Maison des 3 Quartiers</div>
+              </div>
+              <div class="actions">
+                <a class="ghost" href="${ev.source}" target="_blank">Plus d'infos</a>
+                <a class="btn" href="${ev.source}" target="_blank">Réserver</a>
+              </div>
+            </article>`);
+        });
+        updateCarouselVisibility('M3Q');
+        
         bindToggleButtons();
       }
 
