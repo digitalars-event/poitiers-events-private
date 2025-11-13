@@ -64,15 +64,18 @@ def scrape_m3q():
             booking_url = button["href"] if button else None
 
             events.append({
-                "etablissement": "Maison des 3 quartiers",
+                "cinema": "Maison des 3 Quartiers",
+                "etablissement": "Maison des 3 Quartiers",
                 "date": current_date,
                 "title": event_title,
                 "subtitle": subtitle,
                 "description": description,
                 "time": time_info,
                 "image": image_url,
-                "ticket": booking_url
+                "ticket": booking_url,
+                "source": URL
             })
+
 
     return events
 
