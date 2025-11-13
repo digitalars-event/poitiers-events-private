@@ -562,6 +562,25 @@
         });
       }
 
+      function cleanM3QDescription(ev) {
+        let desc = ev.description || '';
+      
+        // 1) Retire le titre du début s’il est présent dans la description
+        if (desc.toLowerCase().startsWith(ev.title?.toLowerCase())) {
+          desc = desc.substring(ev.title.length).trim();
+        }
+      
+        // 2) Retire la date en doublon si elle apparait au début du texte
+        if (ev.date && desc.toLowerCase().startsWith(ev.date.toLowerCase())) {
+          desc = desc.substring(ev.date.length).trim();
+        }
+      
+        // 3) Nettoyage des multiples espaces / nouvelles lignes
+        desc = desc.replace(/\s+/g, ' ').trim();
+      
+        return desc;
+      }
+
       /* === RENDER ALL (intégralement conservée) === */
       function renderAll(events) {
         const grids = {
@@ -713,7 +732,7 @@
               <div class="content">
                 <h3>${ev.title}</h3>
                 <div class="meta">${ev.date} · ${ev.time || ''}</div>
-                <p class="synopsis">${ev.description || ''}</p>
+                <p class="synopsis">${cleanM3QDescription(ev)}</p>
                 <button class="toggle-btn">Voir plus</button>
               </div>
               <div class="actions">
