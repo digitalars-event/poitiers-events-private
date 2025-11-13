@@ -452,7 +452,7 @@
         <label class="filter-item"><input type="checkbox" value="Parc Expo" checked />Parc Expo</label>
         <label class="filter-item"><input type="checkbox" value="TAP" checked />TAP Poitiers</label>
         <label class="filter-item"><input type="checkbox" value="Confort Moderne" checked />Confort Moderne</label>
-        <label class="filter-item"><input type="checkbox" value="Confort Moderne" checked />Maison des 3 Quartiers</label>
+        <label class="filter-item"><input type="checkbox" value="Maison des 3 Quartiers" checked />Maison des 3 Quartiers</label>
       </div>
     </div>
 
@@ -706,21 +706,25 @@
 
         // === MAISON DES 3 QUARTIERS ===
         events.filter(ev => ev.cinema?.includes('Maison des 3 Quartiers')).forEach(ev => {
-          const poster = ev.poster || '';
-          grids.CM.insertAdjacentHTML('beforeend', `
+          const poster = ev.poster || ev.image || '';
+          grids.M3Q.insertAdjacentHTML('beforeend', `
             <article class="card">
               <div class="cover" style="background-image:url('${poster}');"></div>
               <div class="content">
                 <h3>${ev.title}</h3>
-                <div class="meta">Maison des 3 Quartiers</div>
+                <div class="meta">${ev.date} · ${ev.time || ''}</div>
+                <p class="synopsis">${ev.description || ''}</p>
+                <button class="toggle-btn">Voir plus</button>
               </div>
               <div class="actions">
-                <a class="ghost" href="${ev.source}" target="_blank">Plus d'infos</a>
-                <a class="btn" href="${ev.source}" target="_blank">Réserver</a>
+                <a class="ghost" href="${ev.source}" target="_blank">Infos</a>
+                <a class="btn" href="${ev.ticket || ev.source}" target="_blank">Billetterie</a>
               </div>
-            </article>`);
+            </article>
+          `);
         });
         updateCarouselVisibility('M3Q');
+
         
         bindToggleButtons();
       }
