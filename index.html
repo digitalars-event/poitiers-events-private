@@ -512,7 +512,12 @@
         <button class="carousel-btn right" data-target="gridM3Q">›</button>
       </div>
 
-      
+      <h2 class="section-title">🧪 Espace Mendès France</h2>
+      <div class="carousel-container">
+        <button class="carousel-btn left" data-target="gridEMF">‹</button>
+        <section class="grid" id="gridEMF"></section>
+        <button class="carousel-btn right" data-target="gridEMF">›</button>
+      </div>
 
       <footer>✦ Données issues de <strong>events.json</strong>.</footer>
     </div>
@@ -602,7 +607,8 @@
           Expo: document.getElementById('gridExpo'),
           TAP: document.getElementById('gridTAP'),
           CM: document.getElementById('gridCM'),
-          M3Q: document.getElementById('gridM3Q')
+          M3Q: document.getElementById('gridM3Q'),
+          EMF: document.getElementById('gridEMF') // 👈 AJOUT
         };
       
         Object.values(grids).forEach(g => {
@@ -787,6 +793,38 @@
         });
         updateCarouselVisibility('M3Q');
 
+        // === ESPACE MENDÈS FRANCE ===
+        events.filter(ev => ev.source === "espace mendes france").forEach(ev => {
+        
+          const poster = ev.img || "";
+          const desc = ev.excerpt || ev.description || "";
+          const dateText = ev.occurrences?.[0]?.date || "";
+        
+          grids.EMF.insertAdjacentHTML('beforeend', `
+            <article class="card">
+              <div class="cover" style="background-image:url('${poster}');">
+              </div>
+        
+              <div class="content">
+                <h3>${ev.title}</h3>
+                <div class="meta">${ev.category} · ${dateText}</div>
+        
+                <p class="synopsis" data-full="${ev.description?.replace(/"/g, '&quot;') || ''}">
+                  ${desc}
+                </p>
+        
+                <button class="toggle-btn">Voir plus</button>
+              </div>
+        
+              <div class="actions">
+                <a class="ghost" href="${ev.url}" target="_blank">Plus d'infos</a>
+                <a class="btn" href="${ev.reservation || ev.url}" target="_blank">Billetterie</a>
+              </div>
+            </article>
+          `);
+        });
+        
+        updateCarouselVisibility('EMF');
         
         bindToggleButtons();
       }
