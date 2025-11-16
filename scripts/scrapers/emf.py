@@ -88,35 +88,46 @@ def scrape_day(date_str):
 
     for item in events_html:
         try:
-            # URL de l'événement → identifiant unique
             link_tag = item.select_one("a[href*='/event/']")
             if not link_tag:
                 continue
 
             url = link_tag["href"]
 
-            # Catégorie
             category = clean(item.select_one("span") and item.select_one("span").text)
-
-            # Titre
             title_tag = item.select_one("h3")
             title = clean(title_tag.text) if title_tag else "Sans titre"
 
-            # Résumé (liste)
             excerpt_tag = item.select_one(".elementor-widget-theme-post-excerpt p")
             excerpt = clean(excerpt_tag.text) if excerpt_tag else ""
 
-            # Scraper la page interne
+            # --------------------------
+            # 🔥 EXTRACTION IMAGE LISTING
+            # --------------------------
+            image = None
+
+            bg_div = item.find(style=lambda v: v and "background-image" in v)
+            if bg_div:
+                import re
+                match = re.search(r'url\((.*?)\)', bg_div["style"])
+                if match:
+                    image = match.group(1).strip("'\"")
+
+            if not image:
+                img_tag = item.find("img")
+                if img_tag:
+                    image = img_tag.get("src")
+
+            # Infos page interne
             details = scrape_event_page(url)
 
-            # Construction de l'événement
             results.append({
                 "url": url,
                 "title": title,
                 "category": category,
                 "excerpt": excerpt,
                 "description": details["description"],
-                "img": details["image"],
+                "img": image,  # <<< 🔥 ICI !!!
                 "reservation": details["reservation"],
                 "source": "espace mendes france",
                 "occurrence": {
@@ -129,6 +140,7 @@ def scrape_day(date_str):
             continue
 
     return results
+
 
 # ---------------------------------------------------------
 # Fusion des événements identiques
