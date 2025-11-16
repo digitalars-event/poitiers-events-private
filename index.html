@@ -145,8 +145,9 @@
         position: relative;
         overflow: hidden;
         padding: 0 60px; /* espace pour les flèches */
+        overflow: hidden;
+        flex: 1;
       }
-
 
       .grid {
         display: flex;
@@ -252,10 +253,17 @@
         text-decoration: none;
       }
 
+      .carousel-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        gap: 20px; /* distance entre flèche et carrousel */
+      }
+
       .carousel-btn {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
+        flex-shrink: 0;
         background: radial-gradient(circle at center, var(--brand) 40%, var(--brand) 200%);
         border: 2px solid var(--brand);
         border-radius: 50%;
@@ -263,13 +271,12 @@
         height: 52px;
         font-size: 26px;
         color: #fff;
-        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 20;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-        transition: all 0.3s ease;
+        cursor: pointer;
+        z-index: 50; /* toujours devant, mais pas sur les cartes */
+        position: relative; /* 🔥 NE PAS UTILISER absolute ici */
       }
 
       .carousel-btn:hover {
@@ -278,20 +285,13 @@
         box-shadow: 0 20px 80px var(--brand);
       }
       
-      /* === Boutons latéraux responsives === */
-      .carousel-btn.left,
-      .carousel-btn.right {
-        top: 50%;
-        transform: translateY(-50%);
-      }
-      
       /* Position dynamique selon largeur du container */
       .carousel-btn.left {
-        left: 0;  /* flèche bien à gauche */
+        margin-right: 10px;
       }
       
       .carousel-btn.right {
-        right: 0;
+        margin-left: 10px;
       }
 
       @media (max-width: 1280px) {
