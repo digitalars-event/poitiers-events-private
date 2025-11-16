@@ -84,8 +84,7 @@ def main():
     # --- ESPACE MENDÈS FRANCE ---
     print("\n🧪 ESPACE MENDÈS FRANCE (EMF)...")
     try:
-        # ⚠ Assure-toi que emf.scrape_emf() RETOURNE une liste d'événements
-        emf_events = emf.scrape_emf()
+        emf_events = emf.scrape_emf() or []  # <--- SÉCURITÉ
         print(f"✅ {len(emf_events)} événements récupérés depuis l'Espace Mendès France.")
         all_events += emf_events
     except Exception as e:
