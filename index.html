@@ -459,6 +459,7 @@
         <label class="filter-item"><input type="checkbox" value="TAP" checked />TAP Poitiers</label>
         <label class="filter-item"><input type="checkbox" value="Confort Moderne" checked />Confort Moderne</label>
         <label class="filter-item"><input type="checkbox" value="Maison des 3 Quartiers" checked />Maison des 3 Quartiers</label>
+        <label class="filter-item"><input type="checkbox" value="EMF" checked />Espace Mendès France</label>
       </div>
     </div>
 
@@ -880,17 +881,29 @@
           const textMatch =
             ev.title?.toLowerCase().includes(query) ||
             ev.description?.toLowerCase().includes(query) ||
-            ev.cinema?.toLowerCase().includes(query);
+            ev.cinema?.toLowerCase().includes(query) ||
+            ev.source?.toLowerCase().includes(query);
       
           let match = false;
       
-          // 🎬 Gestion CGR
+          // 🎬 CGR (avec sous-cinémas)
           if (ev.cinema?.startsWith('CGR')) {
             if (!cgrGlobal.checked) return false;
-            if (activeCGRSubs.length === 0) return true;
-            match = activeCGRSubs.includes(ev.cinema);
+            if (activeCGRSubs.length === 0) {
+              match = true;
+            } else {
+              match = activeCGRSubs.includes(ev.cinema);
+            }
+      
+          // 🧪 Espace Mendès France (EV.source = "espace mendes france")
+          } else if (ev.source === 'espace mendes france') {
+            match = checkedValues.includes('EMF');
+      
+          // Autres lieux classiques (Arena, TAP, Confort Moderne, M3Q, etc.)
           } else {
-            match = checkedValues.some(f => ev.cinema?.toLowerCase().includes(f.toLowerCase()));
+            match = checkedValues.some(f =>
+              ev.cinema?.toLowerCase().includes(f.toLowerCase())
+            );
           }
       
           return textMatch && match;
@@ -899,6 +912,7 @@
         renderAll(filtered);
         setupCarousels();
       }
+
 
       /* === INITIALISATION === */
       (async function() {
