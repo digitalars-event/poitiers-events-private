@@ -143,9 +143,8 @@
       /* === CARROUSELS === */
       .carousel-container {
         position: relative;
-        overflow: visible; /* ✅ indispensable pour voir les flèches à l’extérieur */
-        width: 100%;
-        padding: 0 0; /* ✅ supprime les marges internes pour un alignement plus net */
+        overflow: hidden;
+        padding: 0 60px; /* espace pour les flèches */
       }
 
 
@@ -161,7 +160,7 @@
         border: 1px solid var(--border);
         border-radius: 16px;
         overflow: hidden;
-        flex: 0 0 25%; /* 4 cartes visibles */
+        flex: 0 0 calc(25% - 16px); /* 4 cartes visibles */
         box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         transition: transform 0.2s, box-shadow 0.2s;
       }
@@ -268,7 +267,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 10;
+        z-index: 20;
         box-shadow: 0 4px 16px rgba(0,0,0,0.25);
         transition: all 0.3s ease;
       }
@@ -288,13 +287,26 @@
       
       /* Position dynamique selon largeur du container */
       .carousel-btn.left {
-        left: max(-3vw, -40px); /* s’ajuste avec la taille de l’écran */
+        left: 0;  /* flèche bien à gauche */
       }
       
       .carousel-btn.right {
-        right: max(-3vw, -40px);
+        right: 0;
+      }
+
+      @media (max-width: 1280px) {
+        .carousel-container {
+          padding: 0 40px;
+        }
       }
       
+      @media (max-width: 1024px) {
+        .carousel-container {
+          padding: 0 20px;
+        }
+      }
+      
+            
       /* Si l’écran devient trop petit, rapproche automatiquement les flèches */
       @media (max-width: 1300px) {
         .carousel-btn.left { left: -20px; }
