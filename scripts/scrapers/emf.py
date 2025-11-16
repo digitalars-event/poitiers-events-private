@@ -67,9 +67,19 @@ def scrape_day(date_str):
             excerpt_tag = item.select_one(".elementor-widget-theme-post-excerpt p")
             excerpt = clean(excerpt_tag.text) if excerpt_tag else ""
 
-            # Date + heure du jour
-            date_time_tag = item.select_one(".elementor-widget-text-editor")
-            date_time = clean(date_time_tag.text) if date_time_tag else ""
+            # --- Date + Heure ---
+            date_time_tag = item.select_one(
+                ".elementor-widget-text-editor.elementor-hidden-mobile"
+            )
+            
+            # fallback mobile
+            if not date_time_tag:
+                date_time_tag = item.select_one(
+                    ".elementor-widget-text-editor.elementor-hidden-desktop.elementor-hidden-tablet"
+                )
+            
+            datetime_raw = clean(date_time_tag.text) if date_time_tag else ""
+
 
             # Image
             img_tag = item.find("img")
