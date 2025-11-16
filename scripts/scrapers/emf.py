@@ -1,3 +1,4 @@
+
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
@@ -7,12 +8,11 @@ import time
 BASE_URL = "https://emf.fr/le-programme/#s=&date={}&tax="
 
 # ---------------------------------------------------------
-# 🔧 Génération de la liste des dates à scraper
+# Génération des dates
 # ---------------------------------------------------------
 def generate_dates(start="2025-11-16", end="2025-12-14"):
     start_date = datetime.strptime(start, "%Y-%m-%d")
     end_date = datetime.strptime(end, "%Y-%m-%d")
-
     dates = []
     current = start_date
     while current <= end_date:
@@ -21,7 +21,7 @@ def generate_dates(start="2025-11-16", end="2025-12-14"):
     return dates
 
 # ---------------------------------------------------------
-# 🔍 Extraction propre du texte
+# Cleaner
 # ---------------------------------------------------------
 def clean(text):
     if not text:
@@ -29,7 +29,35 @@ def clean(text):
     return " ".join(text.strip().split())
 
 # ---------------------------------------------------------
-# 🔥 Scraper un jour
+# Scraper la page interne de l’événement
+# ---------------------------------------------------------
+def scrape_event_page(url):
+    try:
+        r = requests.get(url, timeout=10)
+        soup = BeautifulSoup(r.text, "html.parser")
+    except:
+        return {"description": "", "image": None, "reservation": None}
+
+    # Description : toute la zone de contenu principal
+    desc_block = soup.select_one(".elementor-widget-theme-post-content")
+    description = clean(desc_block.get_text(" ", strip=True)) if desc_block else ""
+
+    # Image HD
+    img_tag = soup.select_one("img")
+    image = img_tag["src"] if img_tag else None
+
+    # Lien billetterie (ex: bouton "RÉSERVATIONS")
+    reservation_btn = soup.find("a", string=lambda t: t and "réserv" in t.lower())
+    reservation_link = reservation_btn["href"] if reservation_btn else None
+
+    return {
+        "description": description,
+        "image": image,
+        "reservation": reservation_link
+    }
+
+# ---------------------------------------------------------
+# Scraper la liste (boucle Elementor)
 # ---------------------------------------------------------
 def scrape_day(date_str):
     url = BASE_URL.format(date_str)
@@ -42,61 +70,46 @@ def scrape_day(date_str):
         return []
 
     soup = BeautifulSoup(r.text, "html.parser")
-
-    # Chaque événement est un "e-loop-item"
     events_html = soup.select(".e-loop-item")
     results = []
 
     for item in events_html:
         try:
-            # Lien principal → identifiant unique de l’événement
+            # URL de l'événement → identifiant unique
             link_tag = item.select_one("a[href*='/event/']")
             if not link_tag:
                 continue
 
             url = link_tag["href"]
 
-            # Catégorie (ex: Expositions)
+            # Catégorie
             category = clean(item.select_one("span") and item.select_one("span").text)
 
             # Titre
             title_tag = item.select_one("h3")
             title = clean(title_tag.text) if title_tag else "Sans titre"
 
-            # Résumé court
+            # Résumé (liste)
             excerpt_tag = item.select_one(".elementor-widget-theme-post-excerpt p")
             excerpt = clean(excerpt_tag.text) if excerpt_tag else ""
 
-            # --- Date + Heure ---
-            date_time_tag = item.select_one(
-                ".elementor-widget-text-editor.elementor-hidden-mobile"
-            )
-            
-            # fallback mobile
-            if not date_time_tag:
-                date_time_tag = item.select_one(
-                    ".elementor-widget-text-editor.elementor-hidden-desktop.elementor-hidden-tablet"
-                )
-            
-            datetime_raw = clean(date_time_tag.text) if date_time_tag else ""
+            # Scraper la page interne
+            details = scrape_event_page(url)
 
-
-            # Image
-            img_tag = item.find("img")
-            img = img_tag["src"] if img_tag else None
-
+            # Construction de l'événement
             results.append({
                 "url": url,
                 "title": title,
                 "category": category,
                 "excerpt": excerpt,
-                "img": img,
+                "description": details["description"],
+                "img": details["image"],
+                "reservation": details["reservation"],
+                "source": "espace mendes france",
                 "occurrence": {
-                    "date": date_str,
-                    "datetime_raw": datetime_raw   # ✅ ici !
+                    "date": date_str
                 }
             })
-
 
         except Exception as e:
             print("Erreur sur un item :", e)
@@ -105,13 +118,13 @@ def scrape_day(date_str):
     return results
 
 # ---------------------------------------------------------
-# 🧠 Fusionner les événements identiques
+# Fusion des événements identiques
 # ---------------------------------------------------------
 def merge_events(events):
     merged = {}
 
     for ev in events:
-        key = ev["url"]  # identifiant unique = l'URL
+        key = ev["url"]
 
         if key not in merged:
             merged[key] = {
@@ -119,7 +132,10 @@ def merge_events(events):
                 "title": ev["title"],
                 "category": ev["category"],
                 "excerpt": ev["excerpt"],
+                "description": ev["description"],
                 "img": ev["img"],
+                "reservation": ev["reservation"],
+                "source": ev["source"],
                 "occurrences": []
             }
 
@@ -128,26 +144,23 @@ def merge_events(events):
     return list(merged.values())
 
 # ---------------------------------------------------------
-# 🚀 Script principal
+# Main
 # ---------------------------------------------------------
 def scrape_emf():
     all_events = []
 
-    dates = generate_dates("2025-11-16", "2025-12-14")
-
-    for date in dates:
-        events_day = scrape_day(date)
-        all_events.extend(events_day)
-        time.sleep(1)
+    for date in generate_dates("2025-11-16", "2025-12-14"):
+        all_events.extend(scrape_day(date))
+        time.sleep(0.7)
 
     cleaned = merge_events(all_events)
 
     with open("emf_events.json", "w", encoding="utf-8") as f:
         json.dump(cleaned, f, indent=2, ensure_ascii=False)
 
-    print(f"\n👍 Scraping terminé, {len(cleaned)} événements uniques sauvegardés dans emf_events.json")
-
-    return cleaned  # <--- 🔥 LA LIGNE QUI MANQUAIT
+    print(f"\n👍 {len(cleaned)} événements uniques sauvegardés dans emf_events.json")
+    return cleaned
 
 if __name__ == "__main__":
     scrape_emf()
+
