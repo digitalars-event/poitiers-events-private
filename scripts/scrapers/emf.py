@@ -38,30 +38,28 @@ def scrape_event_page(url):
     except:
         return {"description": "", "image": None, "reservation": None}
 
-    # Description : toute la zone de contenu principal
+    # Description : zone Elementor principale
     desc_block = soup.select_one(".elementor-widget-theme-post-content")
     description = clean(desc_block.get_text(" ", strip=True)) if desc_block else ""
 
-    # Image HD
-    img = None
-    
-    # 1) Cherche un div avec un background-image inline
-    bg_div = item.find(style=lambda v: v and "background-image" in v)
+    # ----- IMAGE -----
+    image = None
+
+    # 1) Cherche une image dans un background-image inline
+    bg_div = soup.find(style=lambda v: v and "background-image" in v)
     if bg_div:
-        # extrait l'URL du style CSS
         import re
         match = re.search(r'url\((.*?)\)', bg_div["style"])
         if match:
-            img = match.group(1).strip('\'"')
-    
+            image = match.group(1).strip('\'"')
+
     # 2) Sinon fallback sur img classique
-    if not img:
-        img_tag = item.find("img")
+    if not image:
+        img_tag = soup.find("img")
         if img_tag:
-            img = img_tag.get("src")
+            image = img_tag.get("src")
 
-
-    # Lien billetterie (ex: bouton "RÉSERVATIONS")
+    # ----- RÉSERVATION -----
     reservation_btn = soup.find("a", string=lambda t: t and "réserv" in t.lower())
     reservation_link = reservation_btn["href"] if reservation_btn else None
 
