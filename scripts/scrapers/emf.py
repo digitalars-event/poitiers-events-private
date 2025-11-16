@@ -127,7 +127,7 @@ def scrape_emf():
     for date in dates:
         events_day = scrape_day(date)
         all_events.extend(events_day)
-        time.sleep(1)  # éviter de spammer le site
+        time.sleep(1)
 
     cleaned = merge_events(all_events)
 
@@ -135,6 +135,8 @@ def scrape_emf():
         json.dump(cleaned, f, indent=2, ensure_ascii=False)
 
     print(f"\n👍 Scraping terminé, {len(cleaned)} événements uniques sauvegardés dans emf_events.json")
+
+    return cleaned  # <--- 🔥 LA LIGNE QUI MANQUAIT
 
 if __name__ == "__main__":
     scrape_emf()
