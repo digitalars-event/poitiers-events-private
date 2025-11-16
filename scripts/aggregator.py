@@ -13,76 +13,76 @@ def main():
     # --- CGR ---
     print("🎬 CGR...")
     try:
-         cgr_events = cgr.scrape()
-         print(f"✅ {len(cgr_events)} événements récupérés depuis les cinémas CGR.")
-         all_events += cgr_events
-     except Exception as e:
-         print(f"❌ Erreur lors du scraping CGR : {e}")
+        cgr_events = cgr.scrape()
+        print(f"✅ {len(cgr_events)} événements récupérés depuis les cinémas CGR.")
+        all_events += cgr_events
+    except Exception as e:
+        print(f"❌ Erreur lors du scraping CGR : {e}")
 
-     # --- ARENA FUTUROSCOPE ---
-     print("\n🎤 ARENA FUTUROSCOPE...")
-     try:
-         arena_events = arena.scrape_arena()
-         print(f"✅ {len(arena_events)} événements récupérés depuis l'Arena Futuroscope.")
-         all_events += arena_events
-     except Exception as e:
-         print(f"❌ Erreur lors du scraping Arena : {e}")
+    # --- ARENA FUTUROSCOPE ---
+    print("\n🎤 ARENA FUTUROSCOPE...")
+    try:
+        arena_events = arena.scrape_arena()
+        print(f"✅ {len(arena_events)} événements récupérés depuis l'Arena Futuroscope.")
+        all_events += arena_events
+    except Exception as e:
+        print(f"❌ Erreur lors du scraping Arena : {e}")
 
-     # --- REPUBLIC CORNER ---
-     print("\n🎭 REPUBLIC CORNER...")
-     try:
-         rc_events = republic_corner.scrape_republic_corner()
-         print(f"✅ {len(rc_events)} événements récupérés depuis le Republic Corner.")
-         all_events += rc_events
-     except Exception as e:
-         print(f"❌ Erreur lors du scraping Republic Corner : {e}")
+    # --- REPUBLIC CORNER ---
+    print("\n🎭 REPUBLIC CORNER...")
+    try:
+        rc_events = republic_corner.scrape_republic_corner()
+        print(f"✅ {len(rc_events)} événements récupérés depuis le Republic Corner.")
+        all_events += rc_events
+    except Exception as e:
+        print(f"❌ Erreur lors du scraping Republic Corner : {e}")
 
-     # --- PARC EXPO GRAND POITIERS ---
-     print("\n🏛️ PARC EXPO GRAND POITIERS...")
-     try:
-         expo_events = parc_expo.scrape_parc_expo()
-         print(f"✅ {len(expo_events)} événements récupérés depuis le Parc Expo Grand Poitiers.")
-         all_events += expo_events
-     except Exception as e:
-         print(f"❌ Erreur lors du scraping Parc Expo : {e}")
+    # --- PARC EXPO GRAND POITIERS ---
+    print("\n🏛️ PARC EXPO GRAND POITIERS...")
+    try:
+        expo_events = parc_expo.scrape_parc_expo()
+        print(f"✅ {len(expo_events)} événements récupérés depuis le Parc Expo Grand Poitiers.")
+        all_events += expo_events
+    except Exception as e:
+        print(f"❌ Erreur lors du scraping Parc Expo : {e}")
 
-     # --- TAP POITIERS ---
-     print("\n🎭 TAP POITIERS...")
-     try:
-         tap_data = tap.scrape_tap()
-         cinema_events = tap_data.get("cinema", [])
-         spectacle_events = tap_data.get("spectacle", [])
-         total_tap = len(cinema_events) + len(spectacle_events)
-         print(
-             f"✅ {total_tap} événements récupérés depuis le TAP Poitiers "
-             f"({len(cinema_events)} cinéma, {len(spectacle_events)} spectacles)."
-         )
-         all_events += cinema_events + spectacle_events
-     except Exception as e:
-         print(f"❌ Erreur lors du scraping TAP Poitiers : {e}")
+    # --- TAP POITIERS ---
+    print("\n🎭 TAP POITIERS...")
+    try:
+        tap_data = tap.scrape_tap()
+        cinema_events = tap_data.get("cinema", [])
+        spectacle_events = tap_data.get("spectacle", [])
+        total_tap = len(cinema_events) + len(spectacle_events)
+        print(
+            f"✅ {total_tap} événements récupérés depuis le TAP Poitiers "
+            f"({len(cinema_events)} cinéma, {len(spectacle_events)} spectacles)."
+        )
+        all_events += cinema_events + spectacle_events
+    except Exception as e:
+        print(f"❌ Erreur lors du scraping TAP Poitiers : {e}")
 
-     # --- CONFORT MODERNE ---
-     print("\n🎸 CONFORT MODERNE...")
-     try:
-         confort_events = confort_moderne.scrape_confort_moderne()
-         print(f"✅ {len(confort_events)} événements récupérés depuis le Confort Moderne.")
-         all_events += confort_events
-     except Exception as e:
-         print(f"❌ Erreur lors du scraping Confort Moderne : {e}")
+    # --- CONFORT MODERNE ---
+    print("\n🎸 CONFORT MODERNE...")
+    try:
+        confort_events = confort_moderne.scrape_confort_moderne()
+        print(f"✅ {len(confort_events)} événements récupérés depuis le Confort Moderne.")
+        all_events += confort_events
+    except Exception as e:
+        print(f"❌ Erreur lors du scraping Confort Moderne : {e}")
 
-     # --- Maison des 3 quartiers ---
-     print("\n🏡 MAISON DES 3 QUARTIERS (M3Q)...")
-     try:
-         m3q_events = m3q.scrape_m3q()
-         print(f"✅ {len(m3q_events)} événements récupérés depuis la M3Q.")
-         all_events += m3q_events
-     except Exception as e:
-         print(f"❌ Erreur lors du scraping M3Q : {e}")
+    # --- MAISON DES 3 QUARTIERS ---
+    print("\n🏡 MAISON DES 3 QUARTIERS (M3Q)...")
+    try:
+        m3q_events = m3q.scrape_m3q()
+        print(f"✅ {len(m3q_events)} événements récupérés depuis la M3Q.")
+        all_events += m3q_events
+    except Exception as e:
+        print(f"❌ Erreur lors du scraping M3Q : {e}")
 
     # --- ESPACE MENDÈS FRANCE ---
     print("\n🧪 ESPACE MENDÈS FRANCE (EMF)...")
     try:
-        emf_events = emf.scrape_emf() or []  # <--- SÉCURITÉ
+        emf_events = emf.scrape_emf() or []
         print(f"✅ {len(emf_events)} événements récupérés depuis l'Espace Mendès France.")
         all_events += emf_events
     except Exception as e:
