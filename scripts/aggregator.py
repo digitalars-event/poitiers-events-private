@@ -5,9 +5,7 @@ import json
 from datetime import datetime, timezone
 
 # --- Imports des scrapers ---
-# from scrapers import cgr, arena, republic_corner, parc_expo, tap, confort_moderne, m3q
-from scrapers import emf
-
+from scrapers import cgr, arena, republic_corner, parc_expo, tap, confort_moderne, m3q, emf
 
 def main():
     all_events = []
