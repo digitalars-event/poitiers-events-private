@@ -2,15 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import json
-import time
 import re
+
 
 BASE_URL = "https://emf.fr/le-programme/#s=&date={}&tax="
 
 
-# ---------------------------------------------------------
-# Génération des dates
-# ---------------------------------------------------------
 def generate_dates(start="2025-11-16", end="2025-12-14"):
     start_date = datetime.strptime(start, "%Y-%m-%d")
     end_date = datetime.strptime(end, "%Y-%m-%d")
@@ -22,13 +19,30 @@ def generate_dates(start="2025-11-16", end="2025-12-14"):
     return dates
 
 
-# ---------------------------------------------------------
-# Cleaner
-# ---------------------------------------------------------
 def clean(text):
     if not text:
         return ""
     return " ".join(text.strip().split())
+
+
+# ---------------------------------------------------------
+# 🔥 Scrape le CSS inline et construit un dictionnaire :
+#    { "91225": "https://....jpg" }
+# ---------------------------------------------------------
+def extract_images_from_inline_css(soup):
+    image_map = {}
+
+    styles = soup.find_all("style")
+
+    pattern = r"\.e-loop-item-(\d+).*?background-image:\s*url\((.*?)\)"
+
+    for style in styles:
+        css = style.text
+        matches = re.findall(pattern, css, re.DOTALL)
+        for loop_id, img in matches:
+            image_map[loop_id] = img.strip('"\' ')
+
+    return image_map
 
 
 # ---------------------------------------------------------
@@ -54,35 +68,7 @@ def scrape_event_page(url):
 
 
 # ---------------------------------------------------------
-# Récupération du CSS Elementor (pour extraire les images)
-# ---------------------------------------------------------
-def fetch_css_image_map(soup):
-    """
-    Récupère le fichier CSS Elementor et construit un dictionnaire :
-    { loop_id: image_url }
-    """
-
-    css_link = soup.find("link", id=lambda x: x and x.startswith("elementor-post-"))
-    if not css_link:
-        return {}
-
-    css_url = css_link["href"]
-
-    try:
-        css = requests.get(css_url, timeout=10).text
-    except:
-        return {}
-
-    # Regex pour capturer : .e-loop-item-XXXXX ... background-image: url(...)
-    pattern = r'\.e-loop-item-(\d+).*?background-image:\s*url\((.*?)\)'
-    matches = re.findall(pattern, css, re.DOTALL)
-
-    image_map = {loop_id: img.strip('"\'') for loop_id, img in matches}
-    return image_map
-
-
-# ---------------------------------------------------------
-# Scraper une journée
+# Scrape une journée
 # ---------------------------------------------------------
 def scrape_day(date_str):
     url = BASE_URL.format(date_str)
@@ -95,22 +81,21 @@ def scrape_day(date_str):
 
     soup = BeautifulSoup(r.text, "html.parser")
 
-    # 🔥 Récupération des images via CSS Elementor
-    image_map = fetch_css_image_map(soup)
+    # 🔥 Extraire les images à partir des styles inline
+    image_map = extract_images_from_inline_css(soup)
 
-    events_html = soup.select(".e-loop-item")
     results = []
 
-    for item in events_html:
+    for item in soup.select(".e-loop-item"):
         try:
-            # ID interne .e-loop-item-XXXXX
+            # Trouver l'ID e-loop-item-XXXXX
             loop_id = None
-            for class_name in item.get("class", []):
-                m = re.match(r"e-loop-item-(\d+)", class_name)
-                if m:
-                    loop_id = m.group(1)
+            for c in item.get("class", []):
+                match = re.match(r"e-loop-item-(\d+)", c)
+                if match:
+                    loop_id = match.group(1)
 
-            # URL interne
+            # URL
             link_tag = item.select_one("a[href*='/event/']")
             if not link_tag:
                 continue
@@ -121,16 +106,16 @@ def scrape_day(date_str):
 
             # Titre
             title_tag = item.select_one("h3")
-            title = clean(title_tag.text) if title_tag else "Sans titre"
+            title = clean(title_tag.text) if title_tag else ""
 
-            # Résumé listé
+            # Extrait
             excerpt_tag = item.select_one(".elementor-widget-theme-post-excerpt p")
             excerpt = clean(excerpt_tag.text) if excerpt_tag else ""
 
-            # 🔥 IMAGE EXTRAITE DU CSS
+            # 🔥 Image via CSS inline
             image = image_map.get(loop_id)
 
-            # Détails internes
+            # Contenu interne
             details = scrape_event_page(event_url)
 
             results.append({
@@ -142,9 +127,7 @@ def scrape_day(date_str):
                 "img": image,
                 "reservation": details["reservation"],
                 "source": "espace mendes france",
-                "occurrence": {
-                    "date": date_str
-                }
+                "occurrence": {"date": date_str}
             })
 
         except Exception as e:
@@ -155,7 +138,7 @@ def scrape_day(date_str):
 
 
 # ---------------------------------------------------------
-# Fusion par URL
+# Fusion
 # ---------------------------------------------------------
 def merge_events(events):
     merged = {}
@@ -186,7 +169,6 @@ def merge_events(events):
 def scrape_emf():
     all_events = []
 
-    # ⚡ Beaucoup plus rapide : pas de sleep
     for date in generate_dates("2025-11-16", "2025-12-14"):
         all_events.extend(scrape_day(date))
 
