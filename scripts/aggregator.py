@@ -12,7 +12,7 @@ def main():
 
     # --- CGR ---
     print("🎬 CGR...")
-     try:
+    try:
          cgr_events = cgr.scrape()
          print(f"✅ {len(cgr_events)} événements récupérés depuis les cinémas CGR.")
          all_events += cgr_events
