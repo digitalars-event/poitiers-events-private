@@ -93,9 +93,10 @@ def scrape_day(date_str):
                 "img": img,
                 "occurrence": {
                     "date": date_str,
-                    "datetime_raw": date_time
+                    "datetime_raw": datetime_raw   # ✅ ici !
                 }
             })
+
 
         except Exception as e:
             print("Erreur sur un item :", e)
