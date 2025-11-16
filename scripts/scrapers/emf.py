@@ -1,11 +1,12 @@
-
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import json
 import time
+import re
 
 BASE_URL = "https://emf.fr/le-programme/#s=&date={}&tax="
+
 
 # ---------------------------------------------------------
 # Génération des dates
@@ -20,6 +21,7 @@ def generate_dates(start="2025-11-16", end="2025-12-14"):
         current += timedelta(days=1)
     return dates
 
+
 # ---------------------------------------------------------
 # Cleaner
 # ---------------------------------------------------------
@@ -28,49 +30,59 @@ def clean(text):
         return ""
     return " ".join(text.strip().split())
 
+
 # ---------------------------------------------------------
-# Scraper la page interne de l’événement
+# Scraper la page interne
 # ---------------------------------------------------------
 def scrape_event_page(url):
     try:
         r = requests.get(url, timeout=10)
         soup = BeautifulSoup(r.text, "html.parser")
     except:
-        return {"description": "", "image": None, "reservation": None}
+        return {"description": "", "reservation": None}
 
-    # Description : zone Elementor principale
     desc_block = soup.select_one(".elementor-widget-theme-post-content")
     description = clean(desc_block.get_text(" ", strip=True)) if desc_block else ""
 
-    # ----- IMAGE -----
-    image = None
-
-    # 1) Cherche une image dans un background-image inline
-    bg_div = soup.find(style=lambda v: v and "background-image" in v)
-    if bg_div:
-        import re
-        match = re.search(r'url\((.*?)\)', bg_div["style"])
-        if match:
-            image = match.group(1).strip('\'"')
-
-    # 2) Sinon fallback sur img classique
-    if not image:
-        img_tag = soup.find("img")
-        if img_tag:
-            image = img_tag.get("src")
-
-    # ----- RÉSERVATION -----
     reservation_btn = soup.find("a", string=lambda t: t and "réserv" in t.lower())
     reservation_link = reservation_btn["href"] if reservation_btn else None
 
     return {
         "description": description,
-        "image": image,
         "reservation": reservation_link
     }
 
+
 # ---------------------------------------------------------
-# Scraper la liste (boucle Elementor)
+# Récupération du CSS Elementor (pour extraire les images)
+# ---------------------------------------------------------
+def fetch_css_image_map(soup):
+    """
+    Récupère le fichier CSS Elementor et construit un dictionnaire :
+    { loop_id: image_url }
+    """
+
+    css_link = soup.find("link", id=lambda x: x and x.startswith("elementor-post-"))
+    if not css_link:
+        return {}
+
+    css_url = css_link["href"]
+
+    try:
+        css = requests.get(css_url, timeout=10).text
+    except:
+        return {}
+
+    # Regex pour capturer : .e-loop-item-XXXXX ... background-image: url(...)
+    pattern = r'\.e-loop-item-(\d+).*?background-image:\s*url\((.*?)\)'
+    matches = re.findall(pattern, css, re.DOTALL)
+
+    image_map = {loop_id: img.strip('"\'') for loop_id, img in matches}
+    return image_map
+
+
+# ---------------------------------------------------------
+# Scraper une journée
 # ---------------------------------------------------------
 def scrape_day(date_str):
     url = BASE_URL.format(date_str)
@@ -78,56 +90,56 @@ def scrape_day(date_str):
 
     try:
         r = requests.get(url, timeout=10)
-    except Exception as e:
-        print("Erreur request :", e)
+    except:
         return []
 
     soup = BeautifulSoup(r.text, "html.parser")
+
+    # 🔥 Récupération des images via CSS Elementor
+    image_map = fetch_css_image_map(soup)
+
     events_html = soup.select(".e-loop-item")
     results = []
 
     for item in events_html:
         try:
+            # ID interne .e-loop-item-XXXXX
+            loop_id = None
+            for class_name in item.get("class", []):
+                m = re.match(r"e-loop-item-(\d+)", class_name)
+                if m:
+                    loop_id = m.group(1)
+
+            # URL interne
             link_tag = item.select_one("a[href*='/event/']")
             if not link_tag:
                 continue
+            event_url = link_tag["href"]
 
-            url = link_tag["href"]
+            # Catégorie
+            category = clean(item.select_one("span").text if item.select_one("span") else "")
 
-            category = clean(item.select_one("span") and item.select_one("span").text)
+            # Titre
             title_tag = item.select_one("h3")
             title = clean(title_tag.text) if title_tag else "Sans titre"
 
+            # Résumé listé
             excerpt_tag = item.select_one(".elementor-widget-theme-post-excerpt p")
             excerpt = clean(excerpt_tag.text) if excerpt_tag else ""
 
-            # --------------------------
-            # 🔥 EXTRACTION IMAGE LISTING
-            # --------------------------
-            image = None
+            # 🔥 IMAGE EXTRAITE DU CSS
+            image = image_map.get(loop_id)
 
-            bg_div = item.find(style=lambda v: v and "background-image" in v)
-            if bg_div:
-                import re
-                match = re.search(r'url\((.*?)\)', bg_div["style"])
-                if match:
-                    image = match.group(1).strip("'\"")
-
-            if not image:
-                img_tag = item.find("img")
-                if img_tag:
-                    image = img_tag.get("src")
-
-            # Infos page interne
-            details = scrape_event_page(url)
+            # Détails internes
+            details = scrape_event_page(event_url)
 
             results.append({
-                "url": url,
+                "url": event_url,
                 "title": title,
                 "category": category,
                 "excerpt": excerpt,
                 "description": details["description"],
-                "img": image,  # <<< 🔥 ICI !!!
+                "img": image,
                 "reservation": details["reservation"],
                 "source": "espace mendes france",
                 "occurrence": {
@@ -143,16 +155,15 @@ def scrape_day(date_str):
 
 
 # ---------------------------------------------------------
-# Fusion des événements identiques
+# Fusion par URL
 # ---------------------------------------------------------
 def merge_events(events):
     merged = {}
 
     for ev in events:
-        key = ev["url"]
-
-        if key not in merged:
-            merged[key] = {
+        url = ev["url"]
+        if url not in merged:
+            merged[url] = {
                 "url": ev["url"],
                 "title": ev["title"],
                 "category": ev["category"],
@@ -164,9 +175,10 @@ def merge_events(events):
                 "occurrences": []
             }
 
-        merged[key]["occurrences"].append(ev["occurrence"])
+        merged[url]["occurrences"].append(ev["occurrence"])
 
     return list(merged.values())
+
 
 # ---------------------------------------------------------
 # Main
@@ -174,9 +186,9 @@ def merge_events(events):
 def scrape_emf():
     all_events = []
 
+    # ⚡ Beaucoup plus rapide : pas de sleep
     for date in generate_dates("2025-11-16", "2025-12-14"):
         all_events.extend(scrape_day(date))
-        time.sleep(0.7)
 
     cleaned = merge_events(all_events)
 
@@ -186,6 +198,6 @@ def scrape_emf():
     print(f"\n👍 {len(cleaned)} événements uniques sauvegardés dans emf_events.json")
     return cleaned
 
+
 if __name__ == "__main__":
     scrape_emf()
-
