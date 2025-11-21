@@ -256,6 +256,7 @@
       }
 
       .carousel-wrapper {
+        overflow: hidden;
         position: relative;
         display: flex;
         align-items: center;
@@ -905,7 +906,9 @@
       
             const container = grid.closest('.carousel-container');
             const visibleWidth = container.offsetWidth;
-            const scrollAmount = visibleWidth * 0.9;
+            
+            const cardWidth = grid.querySelector(".card").offsetWidth + 16; // 16px = gap
+            const scrollAmount = cardWidth * 1; // défile 1 carte exactement
       
             const current = parseFloat(grid.dataset.offset || 0);
             let next = current;
