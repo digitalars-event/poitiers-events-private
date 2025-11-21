@@ -664,25 +664,46 @@
       
         // === CGR ===
         events.filter(ev => ev.cinema?.includes('CGR')).forEach(ev => {
+        
           const poster = ev.poster || ev.image || '';
           const genres = ev.genres || 'Genres non précisés';
-          const desc = ev.description || ev.synopsis || '—';
+        
+          // === Texte court (affiché au départ) ===
+          const shortText = (ev.description || ev.synopsis || '—')
+                              .split(' ')
+                              .slice(0, 30)
+                              .join(' ') + '...';
+        
+          // === Texte complet ===
+          const fullText = ev.description || ev.synopsis || '—';
+        
           grids.CGR.insertAdjacentHTML('beforeend', `
             <article class="card">
-              <div class="cover" style="background-image:url('${poster}');"><div class="badge">Actuellement à l'affiche</div></div>
+              <div class="cover" style="background-image:url('${poster}');">
+                <div class="badge">Actuellement à l'affiche</div>
+              </div>
+        
               <div class="content">
                 <h3>${ev.title}</h3>
                 <div class="meta">${ev.cinema} · ${genres} · ${ev.duration || 'Durée inconnue'}</div>
-                <p class="synopsis">${desc}</p>
+        
+                <p class="synopsis"
+                   data-full="${fullText.replace(/"/g, '&quot;')}">
+                   ${shortText}
+                </p>
+        
                 <button class="toggle-btn">Voir plus</button>
               </div>
+        
               <div class="actions">
                 <a class="ghost" href="${ev.source}" target="_blank">Site CGR</a>
                 <a class="btn" href="${ev.source}" target="_blank">Voir les horaires</a>
               </div>
-            </article>`);
+            </article>
+          `);
         });
         updateCarouselVisibility('CGR');
+
       
         // === ARENA ===
         events.filter(ev => ev.cinema?.includes('Arena')).forEach(ev => {
