@@ -446,6 +446,10 @@
           text-align: left;
         }
       }
+
+      .ghost-card {
+        opacity: 0 !important;
+      }
           
     </style>
   </head>
@@ -634,6 +638,25 @@
         return desc;
       }
 
+      /* === GHOST CARD pour corriger le scroll coupé === */
+      function addGhostCard(grid) {
+          if (!grid) return;
+          const card = grid.querySelector(".card");
+          if (!card) return;
+      
+          const ghost = document.createElement("article");
+          ghost.className = "card ghost-card";
+          ghost.style.visibility = "hidden";
+          ghost.style.pointerEvents = "none";
+      
+          // même largeur que les vraies cartes
+          const w = window.getComputedStyle(card).width;
+          ghost.style.minWidth = w;
+          ghost.style.maxWidth = w;
+      
+          grid.appendChild(ghost);
+      }
+
       /* === RENDER ALL (intégralement conservée) === */
       function renderAll(events) {
         const grids = {
@@ -705,6 +728,7 @@
           `);
         });
         updateCarouselVisibility('CGR');
+        addGhostCard(grids.CGR);
 
       
         // === ARENA ===
@@ -725,6 +749,7 @@
             </article>`);
         });
         updateCarouselVisibility('Arena');
+        addGhostCard(grids.Arena);
       
         // === REPUBLIC CORNER ===
         events.filter(ev => ev.cinema?.includes('Republic')).forEach(ev => {
@@ -743,6 +768,7 @@
             </article>`);
         });
         updateCarouselVisibility('RC');
+        addGhostCard(grids.RC);
       
         // === PARC EXPO ===
         events.filter(ev => ev.cinema?.includes('Parc Expo')).forEach(ev => {
@@ -761,6 +787,7 @@
             </article>`);
         });
         updateCarouselVisibility('Expo');
+        addGhostCard(grids.Expo);
       
         // === TAP ===
         events.filter(ev => ev.cinema?.includes('TAP')).forEach(ev => {
@@ -779,6 +806,7 @@
             </article>`);
         });
         updateCarouselVisibility('TAP');
+        addGhostCard(grids.TAP);
       
         // === CONFORT MODERNE ===
         events.filter(ev => ev.cinema?.includes('Confort Moderne')).forEach(ev => {
@@ -797,6 +825,7 @@
             </article>`);
         });
         updateCarouselVisibility('CM');
+        addGhostCard(grids.CM);
 
         // === MAISON DES 3 QUARTIERS ===
         events.filter(ev => ev.cinema?.includes('Maison des 3 Quartiers')).forEach(ev => {
@@ -849,6 +878,7 @@
           `);
         });
         updateCarouselVisibility('M3Q');
+        addGhostCard(grids.M3Q);
 
         // === ESPACE MENDÈS FRANCE ===
         events.filter(ev => ev.source === "espace mendes france").forEach(ev => {
@@ -882,6 +912,7 @@
         });
         
         updateCarouselVisibility('EMF');
+        addGhostCard(grids.EMF);
         
         bindToggleButtons();
       }
