@@ -216,12 +216,14 @@
         font-size:13px;
         line-height:1.5;
         color:var(--text);
-        max-height:3.5em;   /* texte réduit par défaut */
+        max-height:3.5em;      /* texte réduit par défaut */
         overflow:hidden;
         transition:max-height .3s ease;
       }
+      
       .synopsis.expanded{
-        max-height:300px;   /* ouvert */
+        max-height:none;       /* 🔥 plus aucune limite quand "Voir plus" */
+        overflow:visible;
       }
 
       .actions {
